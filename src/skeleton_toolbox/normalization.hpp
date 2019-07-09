@@ -1,7 +1,7 @@
 /*
 *   normalization
 *   by R. Falque
-*   29/11/2018
+*   27/06/2019
 */
 
 #ifndef NORMALIZATION_HPP

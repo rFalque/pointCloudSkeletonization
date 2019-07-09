@@ -24,6 +24,20 @@ general_params:
   visualization: true   # enable / disable the visualizations (true / false)
   graph_provided: false  # skip the graph generation step (true / false)
 
+# Parameters for the embedded_deformation
+embedded_deformation:
+  # if true: load mesh; else: load pointCloud;
+  use_mesh: false
+
+  # 
+  use_geodesic: false
+
+  # 
+  k: 5
+
+  # grid_resolution: 18.0
+  grid_resolution: 40.0
+
 visualization_params:
   nodes_ratio: 50.0
   edges_ratio: 200.0

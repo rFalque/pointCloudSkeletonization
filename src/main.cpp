@@ -14,12 +14,13 @@
 #include <igl/writePLY.h>
 #include <igl/opengl/glfw/Viewer.h>
 
+#include "mesh_tools/plotGraph.hpp"
 #include "mesh_tools/plotMesh.hpp"
 #include "mesh_tools/nanoflannWrapper.hpp"
 
 #include "utils/loadCSV.hpp"
 #include "utils/options.hpp"
-#include "utils/EigenSparseConcatenate.hpp"
+#include "utils/EigenConcatenate.hpp"
 
 #include <Eigen/Dense>
 
@@ -27,11 +28,15 @@
 #include "skeleton_toolbox/compute_initial_laplacian_constraint_weight.hpp"
 #include "skeleton_toolbox/compute_point_laplacian.hpp"
 #include "skeleton_toolbox/normalization.hpp"
+#include "skeleton_toolbox/farthest_sampling_by_sphere.hpp"
+#include "skeleton_toolbox/connect_by_inherit_neigh.hpp"
+#include "skeleton_toolbox/edge_collapse_update.hpp"
 
 #include <ctime>
 
 #include <yaml-cpp/yaml.h>
 #include <vector>
+#include <algorithm>
 
 #include<Eigen/SparseCholesky>
 
@@ -51,6 +56,7 @@
 /* TODO:
  *  - add upper bound to avoid division by 0
  *  - add stopping criteria
+ *  - test the radius search in the nanoflann wrapper
  */
 
 int main(int argc, char* argv[])
@@ -63,7 +69,9 @@ int main(int argc, char* argv[])
 
     igl::readPLY(opts.path_input_file,V, F);
     //igl::readOFF("../data/simplejoint_v4770.off", V, F);
-	plot_mesh(V,F);
+    //igl::readOFF("../data/bunny.off", V, F);
+    
+	//plot_mesh(V,F);
     normalization(V);
 
     int k_for_knn = 30;
@@ -134,10 +142,11 @@ int main(int argc, char* argv[])
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
     std::cout<<"SimplicialLDLT runned in : "<< duration <<" s\n";
 
-    plot_mesh(P,F);
+    //plot_mesh(P,F);
 
     // next step:
     for (int i=0; i< iteration_time; i++) {
+        std::cout<<"contraction step : "<< i+1 <<"\n";
 
         L = compute_laplacian_weight(P, one_ring_list);
         WL *= 3;
@@ -171,8 +180,47 @@ int main(int argc, char* argv[])
     }
 
     // 
-    double sample_radius = 0.0357;
-    
+    double sample_radius = 0.002;
+
+    Eigen::MatrixXd nodes;
+    Eigen::VectorXi correspondences;
+    farthest_sampling_by_sphere(P, sample_radius, nodes, correspondences);
+
+    Eigen::MatrixXi adjacency_matrix;
+    connect_by_inherit_neigh(V, nodes, correspondences, one_ring_list, adjacency_matrix);
+
+adjacency_matrix = adjacency_matrix.unaryExpr([](int x) { return std::min(x, 1); });
+
+
+
+
+Eigen::VectorXd correspondences_copy = correspondences.cast <double> ();
+double modulo_factor = 2;
+
+Eigen::MatrixXd vertices_color;
+vertices_color = Eigen::MatrixXd::Constant(V.rows(), 3, 0.9);
+
+for (int i=0; i<V.rows(); i++)
+{
+    vertices_color(i, 0) = fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
+    vertices_color(i, 1) = 1-fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
+    vertices_color(i, 2) = 1-fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
+}
+/*
+vertices_color.col(0) = correspondences/nodes.rows()*modulo_factor;
+vertices_color.col(1) = Eigen::VectorXd::Constant(V.rows(), 1)-correspondences/nodes.rows()*modulo_factor;
+vertices_color.col(2) = Eigen::VectorXd::Constant(V.rows(), 1)-correspondences/nodes.rows()*modulo_factor;
+
+vertices_color =  vertices_color.array() - (1 * (vertices_color.array()/1));
+*/
+plot_mesh (V, F, vertices_color);
+
+//std::cout<<"nodes:\n" << nodes << "\n";
+//std::cout<<"correspondences:\n" << correspondences.transpose() << "\n";
+
+
+    edge_collapse_update(nodes, correspondences, adjacency_matrix);
+
 
 
     return 0;

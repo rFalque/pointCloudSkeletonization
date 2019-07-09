@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <memory>
+#include <Eigen/Core>
 
 #include "nanoflann.hpp"
 
@@ -51,6 +52,48 @@ public:
 			indexes.push_back( ret_indexes.at(i) );
 
 		return indexes;
+	}
+
+	std::vector< int > radius_search(Eigen::Vector3d query_point, double max_dist)
+	{
+		// Query point:
+		std::vector<double> query_pt;
+		for (int d=0; d<3; d++)
+			query_pt.push_back( query_point(d) );
+
+		//search
+		nanoflann::SearchParams params;
+		std::vector<std::pair<Eigen::Index, double> > matches;
+		this->kd_tree_index->index->radiusSearch(&query_pt.at(0), max_dist, matches, params);
+
+		// pack result into std::vector<int>
+		std::vector< int > indexes;
+		for (int i = 0; i < matches.size(); i++)
+			indexes.push_back( matches.at(i).first );
+
+		return indexes;
+	}
+
+	bool radius_search(Eigen::Vector3d query_point, double max_dist, std::vector<int> & indexes, std::vector<double> & distances)
+	{
+		// Query point:
+		std::vector<double> query_pt;
+		for (int d=0; d<3; d++)
+			query_pt.push_back( query_point(d) );
+
+		//search
+		nanoflann::SearchParams params;
+		std::vector<std::pair<Eigen::Index, double> > matches;
+		this->kd_tree_index->index->radiusSearch(&query_pt.at(0), max_dist, matches, params);
+
+		// pack result into std::vector<int>
+		for (int i = 0; i < matches.size(); i++)
+		{
+			indexes.push_back( matches.at(i).first );
+			distances.push_back( matches.at(i).second );
+		}
+		
+		return true;
 	}
 
 private:
