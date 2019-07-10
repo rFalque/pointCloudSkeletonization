@@ -23,13 +23,15 @@
 
 #include <Eigen/Dense>
 
-#include "skeleton_toolbox/point_ring.hpp"
-#include "skeleton_toolbox/compute_initial_laplacian_constraint_weight.hpp"
-#include "skeleton_toolbox/compute_point_laplacian.hpp"
-#include "skeleton_toolbox/normalization.hpp"
-#include "skeleton_toolbox/farthest_sampling_by_sphere.hpp"
-#include "skeleton_toolbox/connect_by_inherit_neigh.hpp"
-#include "skeleton_toolbox/edge_collapse_update.hpp"
+//#include "skeleton_toolbox/point_ring.hpp"
+//#include "skeleton_toolbox/compute_initial_laplacian_constraint_weight.hpp"
+//#include "skeleton_toolbox/compute_point_laplacian.hpp"
+//#include "skeleton_toolbox/normalization.hpp"
+//#include "skeleton_toolbox/farthest_sampling_by_sphere.hpp"
+//#include "skeleton_toolbox/connect_by_inherit_neigh.hpp"
+//#include "skeleton_toolbox/edge_collapse_update.hpp"
+
+#include "skeleton_toolbox/pointSkeletonization.hpp"
 
 #include <ctime>
 
@@ -66,16 +68,24 @@ int main(int argc, char* argv[])
     Eigen::MatrixXd V; // V: vertex of the surface
     Eigen::MatrixXi F; // F: faces of the surface
 
-    //igl::readPLY(opts.path_input_file,V, F);
-    //igl::readOFF("../data/simplejoint_v4770.off", V, F);
-    std::string file_extension = opts.path_input_obj.substr(opts.path_input_obj.size() - 4);
-    std::cout << file_extension <<std::endl;
+    std::string file_extension = opts.path_input_obj.substr(opts.path_input_obj.size() - 3);
     
-    if (file_extension = "off")
+    if (file_extension == "off")
         igl::readOFF(opts.path_input_obj, V, F);
-    else if (file_extension = "ply")
+    else if (file_extension == "ply")
         igl::readPLY(opts.path_input_obj, V, F);
 
+    PointSkeletonization skeletonizer(V, F, opts);
+    std::cout << "Progress: initialization:\n";
+    skeletonizer.init();
+    std::cout << "Progress: laplacian contraction:\n";
+    skeletonizer.laplacian_contraction();
+    std::cout << "Progress: transform contracted cloud into skeleton:\n";
+    skeletonizer.skeletonization();
+
+
+
+/*
 	//plot_mesh(V,F);
     normalization(V);
 
@@ -96,14 +106,6 @@ int main(int argc, char* argv[])
         OneRing one_ring(i, neighbours_id, V);
         one_ring_list.push_back(one_ring);
     }
-
-
-
-
-
-
-
-
 
     // initialization of: WH, WL, and L
     Eigen::SparseMatrix<double> WH(V.rows(), V.rows());
@@ -148,6 +150,9 @@ int main(int argc, char* argv[])
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
     std::cout<<"SimplicialLDLT runned in : "<< duration <<" s\n";
 
+
+
+
     //plot_mesh(P,F);
 
     // next step:
@@ -191,6 +196,9 @@ int main(int argc, char* argv[])
 
     }
 
+
+
+
     // turn into a Skeletonization part
     double sample_radius = 0.002;
     Eigen::MatrixXd nodes;
@@ -223,7 +231,7 @@ for (int i=0; i<V.rows(); i++)
 }
 plot_mesh (V, F, vertices_color);
 
-
+*/
 
 
 
