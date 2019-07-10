@@ -55,6 +55,7 @@
  *  - add upper bound to avoid division by 0
  *  - add stopping criteria
  *  - test the radius search in the nanoflann wrapper
+ *  - test without the normalization or inverse it afterwards
  */
 
 int main(int argc, char* argv[])
@@ -70,8 +71,11 @@ int main(int argc, char* argv[])
     std::string file_extension = opts.path_input_obj.substr(opts.path_input_obj.size() - 4);
     std::cout << file_extension <<std::endl;
     
-    igl::readOFF(opts.path_input_obj, V, F);
-    
+    if (file_extension = "off")
+        igl::readOFF(opts.path_input_obj, V, F);
+    else if (file_extension = "ply")
+        igl::readPLY(opts.path_input_obj, V, F);
+
 	//plot_mesh(V,F);
     normalization(V);
 
@@ -92,6 +96,10 @@ int main(int argc, char* argv[])
         OneRing one_ring(i, neighbours_id, V);
         one_ring_list.push_back(one_ring);
     }
+
+
+
+
 
 
 

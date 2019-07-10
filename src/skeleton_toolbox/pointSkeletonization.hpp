@@ -4,143 +4,110 @@
 #include <algorithm>           // std::all_of
 #include <Eigen/Dense>
 #include <limits>
-#include "readGraphOBJ.hpp"
-#include "plotGraph.hpp"
-#include "graphOptions.hpp"
+#include "../graph_lib/graphStructure.hpp"
 
 
-class pointSkeletonization
+#include "normalization.hpp"
+#include "pointSkeletonizationOptions.hpp"
+
+#include "point_ring.hpp"
+
+#include "../mesh_tools/nanoflannWrapper.hpp"
+
+
+class PointSkeletonization
 {
 private:
     point_skeletonization_options opts_;                                // Store all visualization infos
 
-
-    Eigen::MatrixXd V_; // V: vertex of the surface
-    Eigen::MatrixXi F_; // F: faces of the surface
-
-	// basic structure for edges and nodes
-	Eigen::MatrixXd nodes_;                                             // should be a N by 3 matrix of doubles
-	Eigen::MatrixXi edges_;                                             // should be a M by 2 matrix of integers
-	int num_nodes_;                                                     // set to N
-	int num_edges_;                                                     // set to M
+    Eigen::MatrixXd pointcloud_;                                        // pointcloud
+	Eigen::MatrixXd contracted_pointcloud_;                             // contracted pointcloud
 	
-	// structures used for fast circulation through data
-	std::vector< std::vector<int> > adjacency_list_;                    // contains for each nodes, its nodes neighbors
-	std::vector< std::vector<int> > adjacency_edge_list_;               // contains for each nodes, its edges neighbors
-	Eigen::VectorXd edges_length_;                                      // used only for Dijkstra
+    Eigen::MatrixXi F_;                                                 // F: faces of the surface (for plots)
 
-	// connectivity properties
-	int is_connected_ = -1;                                             // 0 no, 1 yes, -1 undefined
-	int is_biconnected_ = -1;                                           // 0 no, 1 yes, -1 undefined
-	int is_triconnected_ = -1;                                          // 0 no, 1 yes, -1 undefined
-	int has_bridges_ = -1;                                              // 0 no, 1 yes, -1 undefined
-
-	// storing of the cut sets
-	std::vector< int > one_cut_vertices_;                               // set of articulation points
-	std::vector< std::pair<int, int> > two_cut_vertices_;               // set of two-cut vertices
-	std::vector< std::pair<int, int> > bridges_;                        // set of briges
 	
-	// internal functions used iteratively (defined at the bottom of the file)
-	void removeRow(Eigen::MatrixXd& matrix, unsigned int rowToRemove);
-	void removeRow(Eigen::MatrixXi& matrix, unsigned int rowToRemove);
-	void removeDuplicates(std::vector<std::pair<int, int>>& v);
-	void DFSUtil(int u, std::vector< std::vector<int> > adj, std::vector<bool> &visited);
-	void APUtil(int u, std::vector<bool> & visited, int disc[], int low[], std::vector<int> & parent, std::vector<bool> & ap);
-	void bridgeUtil(int u, std::vector<bool> & visited, int disc[], int low[], std::vector<int> & parent, std::vector< std::pair<int, int> > & bridges);
-	bool is_element_in_vector(int a, std::vector<int> & A, int & element_position);
+	std::vector< OneRing > one_ring_list_;
+
+
+	Graph skeleton;
+
+	inline bool normalization();
+	inline Eigen::VectorXd one_ring_size(std::string distance_type);
 
 public:
 
 	// overloaded creations of the class (set verbose and load the data)
-	Graph(std::string file_name)
+	PointSkeletonization(Eigen::MatrixXd V, Eigen::MatrixXi F)
 	{
-		readGraphOBJ(file_name, nodes_, edges_);
-		set_default_options();
-	}
-
-	Graph(std::string file_name, graph_options opts)
-	{
-		readGraphOBJ(file_name, nodes_, edges_);
-		opts_ = opts;
-	}
-
-	Graph(Eigen::MatrixXd nodes, Eigen::Matrix<int, Eigen::Dynamic, 2> edges)
-	{
-		nodes_ = nodes;
-		edges_ = edges;
-		set_default_options();
-	}
-
-	Graph(Eigen::MatrixXd nodes, Eigen::Matrix<int, Eigen::Dynamic, 2> edges, graph_options opts)
-	{
-		nodes_ = nodes;
-		edges_ = edges;
-		opts_ = opts;
-	}
-
-	Graph(Eigen::MatrixXd nodes, Eigen::MatrixXi adjacency_matrix)
-	{
-		if (adjacency_matrix.rows() != adjacency_matrix.cols() || adjacency_matrix.rows() != nodes.rows()) {
-			std::cout << "Error: wrong input size when assessing adjacency_matrix.rows() != adjacency_matrix.cols() || adjacency_matrix.rows() != nodes.rows()\n ";
-			std::exit(0);
-		}
-		if (adjacency_matrix.transpose() != adjacency_matrix)
-		{
-			std::cout << "Error: the adjacency_matrix should be symmetric\n ";
-			std::exit(0);
-		}
-
-		nodes_ = nodes;
-		Eigen::MatrixXi edges((adjacency_matrix.array() == 0).count(), 2);
-
-		// explore the upper triangle of the adjacency_matrix (without the diagonal)
-		int num_edges = 0;
-		for (int i=0; i<adjacency_matrix.rows(); i++)
-			for (int j=i+1; j<adjacency_matrix.cols(); j++) {
-				if (adjacency_matrix(i,j) == 1)
-				{
-					edges(num_edges, 0) = i;
-					edges(num_edges, 1) = j;
-					num_edges ++;
-				}
-			}
-		edges.conservativeResize(num_edges, 2);
-
-		edges_ = edges;
-		set_default_options();
+		pointcloud_ = V;
+		F_ = F;
 	}
 
 
 	// destructor
-	~Graph()
+	~PointSkeletonization()
 	{
 	}
 
 	// initialisation of the private variables
 	bool init()
 	{
-		if (nodes_.cols()!=3 || edges_.cols()!=2) {
-			std::cout << "Error: wrong graph dimensions" << std::endl;
-			std::exit(1);
+		normalization();
+
+		// get the nearest neighbours
+		nanoflann_wrapper knn_search(V);
+
+		// get the one ring
+		for (int i=0; i<V.rows(); i++) {
+			// (1) search for k closest points and (2) remove the point itself
+			std::vector < int > neighbours_id;
+			neighbours_id = knn_search.return_k_closest_points(V.row(i), k_for_knn+1);
+			neighbours_id.erase(neighbours_id.begin());
+
+			// look for the one_ring neighbors
+			OneRing one_ring(i, neighbours_id, V);
+			one_ring_list_.push_back(one_ring);
 		}
 
-		one_cut_vertices_.clear();
-		two_cut_vertices_.clear();
-		bridges_.clear();
-
-		// set up properties
-		num_nodes_ = nodes_.rows();
-		num_edges_ = edges_.rows();
-
-		// set up edges_length
-		edges_length_ = Eigen::VectorXd::Zero(num_edges_);
-		for (int i=0; i<num_edges_; i++)
-			edges_length_(i) = (nodes_.row(edges_(i,0)) - nodes_.row(edges_(i,1)) ).norm();
-		
-		// set up the adjacency list
-		set_adjacency_lists();
-
 		return true;
+	}
+
+	bool laplacian_contraction() {
+	    // initialization of: WH, WL, and L
+		Eigen::VectorXd ms;
+    	ms = one_ring_size("mean");
+    	double initWL = 1.0/(5.0*ms.mean());
+
+		Eigen::SparseMatrix<double> WL(V.rows(), V.rows());
+		for (int i=0; i<V.rows(); i++)
+			WL.insert(i,i) = initWL;
+
+		Eigen::SparseMatrix<double> WH(V.rows(), V.rows());
+		for (int i=0; i<V.rows(); i++)
+			WH.insert(i,i) = 1;
+
+		// get laplacian
+	    Eigen::SparseMatrix<double> L = laplacian(pointcloud_, one_ring_list_);
+
+		// first contraction
+
+	    WhP = WH*V;
+		WlL = WL*L;
+		zeros = Eigen::MatrixXd::Zero(WhP.rows(), 3);
+
+		A = concatenate(WlL, WH, 1);
+		b = concatenate(zeros, WhP, 1);
+		A2 = A.transpose() * A;
+		b2 = A.transpose() * b;
+
+		Eigen::SimplicialLDLT<Eigen::SparseMatrix<double> > solver;
+		solver.compute(A2);
+		if(solver.info()!=Eigen::Success) {
+			// decomposition failed
+			std::cout << "Error: solver failed\n";
+		}
+		contracted_pointcloud_ = solver.solve(b2);
+
 	}
 
 	bool set_default_options()
@@ -154,5 +121,135 @@ public:
 	}
 
 };
+
+
+inline Eigen::MatrixXd contracted_points solve_contraction(Eigen::SparseMatrix<double> WH, 
+                                                           Eigen::SparseMatrix<double> WL, Eigen::SparseMatrix<double> L, Eigen::MatrixXd P)
+{
+	// contraction time :)
+	Eigen::SparseMatrix<double> A, A2, WlL;
+	Eigen::MatrixXd b, b2, WhP, zeros;
+
+	WhP = WH*P;
+	WlL = WL*L;
+	zeros = Eigen::MatrixXd::Zero(WhP.rows(), 3);
+
+	A = concatenate(WlL, WH, 1);
+	b = concatenate(zeros, WhP, 1);
+	A2 = A.transpose() * A;
+	b2 = A.transpose() * b;
+}
+
+inline bool PointSkeletonization::normalization()
+{
+    // centre in zero
+    pointcloud_.rowwise() -= (pointcloud_.colwise().minCoeff() + pointcloud_.colwise().maxCoeff()) / 2;
+
+    // make the diagonal 1.6
+    pointcloud_ *= 1.6/(pointcloud_.colwise().maxCoeff() - pointcloud_.colwise().minCoeff()).maxCoeff();
+
+    return true;
+};
+
+
+// return for each point the mean distance to its neighbours
+inline Eigen::VectorXd PointSkeletonization::one_ring_size(std::string distance_type)
+{
+
+
+    // vector to return
+    Eigen::VectorXd out(pointcloud_.rows());
+
+    for (int i=0; i<pointcloud_.rows(); i++) {
+        // get the point:
+        Eigen::Vector3d vertex;
+        vertex = pointcloud_.row(i);
+
+        // get the corresponding one ring structure
+        std::vector<int> one_ring = one_ring_list_.at(i).get_one_ring();
+
+        // store all the distances between the vertex and its neighbours
+        Eigen::VectorXd temp(one_ring.size());
+        for (int neighbour_it=0; neighbour_it<one_ring.size(); neighbour_it++) {
+            Eigen::Vector3d neighbour;
+            neighbour = cloud.row(one_ring.at(neighbour_it));
+            temp(neighbour_it) = ( vertex - neighbour ).norm();
+        }
+
+        // get the mean of all the distance to the point
+        if (distance_type=="min")
+            out(i) = temp.minCoeff();
+        else if (distance_type=="mean")
+            out(i) = temp.mean();
+        else if (distance_type=="max")
+            out(i) = temp.maxCoeff();
+    }
+
+    return out;
+};
+
+/*
+ * Definition of cotangent with respect to the dot and cross product 
+ * see "The Geometry of the Dot and Cross Products" from Tevian Dray & Corinne A. Manogue
+ * (there might be a better citation)
+ * 
+ * with v and w two vector and theta in between
+ * |v x w| = |v|.|w|.sin(theta)
+ *  v . w  = |v|.|w|.cos(theta)
+ * cot(theta) = cos(theta) / sin(theta)
+ *            = (v . w) / |v x w|
+ */
+inline double PointSkeletonization::cotan(Eigen::Vector3d v, Eigen::Vector3d w)
+{ 
+    return( ( v.dot(w) ) / ( (v.cross(w)).norm() ) ); 
+};
+
+inline Eigen::SparseMatrix<double> PointSkeletonization::laplacian(Eigen::MatrixXd & cloud, std::vector< OneRing > & one_ring_list) {
+    //Eigen::MatrixXd L = Eigen::MatrixXd::Zero(cloud.rows(), cloud.rows());
+
+    Eigen::SparseMatrix<double> L_2(cloud.rows(), cloud.rows());
+
+    for (int i=0; i<cloud.rows(); i++) {
+        /* The laplacian operator is defined with the cotangent weights for each edge.
+         * E.g., with the two triangles (abd) and (acd), for the edge (ad) we sum cotan(b) and cotan(c).
+         * 
+         *    a---b
+         *    | \ |
+         *    c---d
+         * 
+         */
+
+        Eigen::Vector3d a = cloud.row(i);
+
+        std::vector<int> one_ring = one_ring_list[i].get_one_ring();
+        for (int j=0; j<one_ring.size(); j++) {
+
+            double cot_theta = 0;
+            
+            Eigen::Vector3d d = cloud.row(one_ring[j]);
+
+            std::vector<int> connected_element = one_ring_list[i].get_connected_components(j);
+            
+            for (int connected_element_it=0; connected_element_it<connected_element.size(); connected_element_it++) {
+                Eigen::Vector3d b = cloud.row(connected_element[connected_element_it]);
+
+                Eigen::Vector3d ba = b-a;
+                Eigen::Vector3d bd = b-d;
+
+                cot_theta += cotan(ba, bd);//( ba.dot(bd) ) / ( (ba.cross(bd)).norm() )
+            }
+
+            //cot_theta /= connected_element.size();
+            //if (cot_theta>10000)
+            //    cot_theta = 10000;
+            
+            L_2.coeffRef(i, one_ring[j]) += cot_theta;
+            L_2.coeffRef(i, i) -= cot_theta;
+        }
+    }
+    
+    return L_2;
+};
+
 
 #endif

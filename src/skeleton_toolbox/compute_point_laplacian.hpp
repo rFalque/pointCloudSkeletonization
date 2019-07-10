@@ -61,7 +61,7 @@ inline Eigen::SparseMatrix<double> compute_laplacian_weight(Eigen::MatrixXd & cl
                 Eigen::Vector3d ba = b-a;
                 Eigen::Vector3d bd = b-d;
 
-                cot_theta += cotan(ba, bd);
+                cot_theta += cotan(ba, bd);//( ba.dot(bd) ) / ( (ba.cross(bd)).norm() )
             }
 
             //cot_theta /= connected_element.size();
