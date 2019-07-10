@@ -11,7 +11,15 @@ struct options
 
     bool   visualization;
     bool   verbose;
-    bool   graph_provided;
+
+    double laplacian_threshold;
+    int iteration_time = 5;
+    double termination_criteria = 0.01;
+    double sl = 3;
+    double WC = 1;
+    double sample_radius = 0.002;
+    double MAX_POSITION_CONSTRAINT_WEIGHT;
+    double MAX_LAPLACIAN_CONSTRAINT_WEIGHT;
 
     double nodes_ratio;
     double edges_ratio;
@@ -41,7 +49,16 @@ struct options
         // general options
         visualization                   = config["general_params"]["visualization"].as<bool>();
         verbose                         = config["general_params"]["verbose"].as<bool>();
-        graph_provided                  = config["general_params"]["graph_provided"].as<bool>();
+
+        // skeletonization
+        laplacian_threshold             = config["skeletonization"]["laplacian_threshold"].as<double>();
+        iteration_time                  = config["skeletonization"]["iteration_time"].as<int>();
+        termination_criteria            = config["skeletonization"]["termination_criteria"].as<double>();
+        sl                              = config["skeletonization"]["sl"].as<double>();
+        WC                              = config["skeletonization"]["WC"].as<double>();
+        sample_radius                   = config["skeletonization"]["sample_radius"].as<double>();
+        MAX_POSITION_CONSTRAINT_WEIGHT  = config["skeletonization"]["MAX_POSITION_CONSTRAINT_WEIGHT"].as<double>();
+        MAX_LAPLACIAN_CONSTRAINT_WEIGHT = config["skeletonization"]["MAX_LAPLACIAN_CONSTRAINT_WEIGHT"].as<double>();
 
         // visualization parameters
         nodes_ratio                     = config["visualization_params"]["nodes_ratio"].as<double>();
