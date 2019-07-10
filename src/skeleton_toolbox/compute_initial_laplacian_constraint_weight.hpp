@@ -8,10 +8,12 @@
 #define COMPUTE_INITIAL_LAPLACIAN_WEIGHT_HPP
 
 #include <Eigen/Core>
+#include <string>
 #include "point_ring.hpp"
 
 // return for each point the mean distance to its neighbours
-inline Eigen::VectorXd one_ring_size(Eigen::MatrixXd & cloud, std::vector< OneRing > & one_ring_list) {
+inline Eigen::VectorXd one_ring_size(Eigen::MatrixXd & cloud, std::vector< OneRing > & one_ring_list, std::string distance_type) {
+
 
     // vector to return
     Eigen::VectorXd out(cloud.rows());
@@ -33,7 +35,12 @@ inline Eigen::VectorXd one_ring_size(Eigen::MatrixXd & cloud, std::vector< OneRi
         }
 
         // get the mean of all the distance to the point
-        out(i) = temp.mean();
+        if (distance_type=="min")
+            out(i) = temp.minCoeff();
+        else if (distance_type=="mean")
+            out(i) = temp.mean();
+        else if (distance_type=="max")
+            out(i) = temp.maxCoeff();
     }
 
     return out;
@@ -43,7 +50,7 @@ inline double compute_initial_laplacian_weight(Eigen::MatrixXd & cloud, std::vec
     Eigen::VectorXd ms;
     double wl = 0;
 
-    ms = one_ring_size(cloud, one_ring_list);
+    ms = one_ring_size(cloud, one_ring_list, "mean");
     wl = 1.0/(5.0*ms.mean());
 
     return wl;

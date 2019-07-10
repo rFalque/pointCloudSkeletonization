@@ -64,7 +64,9 @@ inline Eigen::SparseMatrix<double> compute_laplacian_weight(Eigen::MatrixXd & cl
                 cot_theta += cotan(ba, bd);
             }
 
-            cot_theta /= connected_element.size();
+            //cot_theta /= connected_element.size();
+            //if (cot_theta>10000)
+            //    cot_theta = 10000;
             
             L_2.coeffRef(i, one_ring[j]) += cot_theta;
             L_2.coeffRef(i, i) -= cot_theta;

@@ -14,7 +14,6 @@
 #include <igl/writePLY.h>
 #include <igl/opengl/glfw/Viewer.h>
 
-#include "mesh_tools/plotGraph.hpp"
 #include "mesh_tools/plotMesh.hpp"
 #include "mesh_tools/nanoflannWrapper.hpp"
 
@@ -46,7 +45,6 @@
  * List of things that could go wrong:
  *  - in the laplacian computation, line (63), ba instead of ab?
  *  - in the laplacian computation, line (66), division by number of neighbours needed?
- *  - in the point_ring, with SVD decomposition, is V the proper matrix for the 2D projection
  *  - in the point_ring, what happen if the one_ring is not connected?
  *  - does the laplacian need to be symmetric (see compute_point_laplacian.m line 31)
  *  - does the laplacian need to be normalized
@@ -67,9 +65,12 @@ int main(int argc, char* argv[])
     Eigen::MatrixXd V; // V: vertex of the surface
     Eigen::MatrixXi F; // F: faces of the surface
 
-    igl::readPLY(opts.path_input_file,V, F);
+    //igl::readPLY(opts.path_input_file,V, F);
     //igl::readOFF("../data/simplejoint_v4770.off", V, F);
-    //igl::readOFF("../data/bunny.off", V, F);
+    std::string file_extension = opts.path_input_obj.substr(opts.path_input_obj.size() - 4);
+    std::cout << file_extension <<std::endl;
+    
+    igl::readOFF(opts.path_input_obj, V, F);
     
 	//plot_mesh(V,F);
     normalization(V);
@@ -92,10 +93,7 @@ int main(int argc, char* argv[])
         one_ring_list.push_back(one_ring);
     }
 
-    int iteration_time = 3;
-    double termination_criteria = 0.01;
 
-    double sl = 3;
 
 
 
@@ -108,7 +106,7 @@ int main(int argc, char* argv[])
 
     Eigen::SparseMatrix<double> WL(V.rows(), V.rows());
     for (int i=0; i<V.rows(); i++)
-        WL.insert(i,i) = initWL;
+        WL.insert(i,i) = initWL*4;
 
     Eigen::SparseMatrix<double> L = compute_laplacian_weight(V, one_ring_list);
     Eigen::MatrixXd P, P2;
@@ -145,18 +143,26 @@ int main(int argc, char* argv[])
     //plot_mesh(P,F);
 
     // next step:
+
+    int iteration_time = 5;
+    double termination_criteria = 0.01;
+
+    double sl = 3;
+    double WC = 1;
+
     for (int i=0; i< iteration_time; i++) {
         std::cout<<"contraction step : "<< i+1 <<"\n";
 
         L = compute_laplacian_weight(P, one_ring_list);
-        WL *= 3;
+        
+        WL *= sl;
         Eigen::VectorXd size, new_size;
-        size = one_ring_size(V, one_ring_list);
-        new_size = one_ring_size(P, one_ring_list);
+        size = one_ring_size(V, one_ring_list, "min");
+        new_size = one_ring_size(P, one_ring_list, "min");
 
         for (int i=0; i<V.rows(); i++)
-            WH.coeffRef(i,i) *= size(i)/new_size(i);
-
+            WH.coeffRef(i,i) = WC*size(i)/new_size(i);
+            //WH.coeffRef(i,i) = sqrt(size(i)/new_size(i));
 
         WhP = WH*P;
         WlL = WL*L;
@@ -165,8 +171,6 @@ int main(int argc, char* argv[])
         b = concatenate(zeros, WhP, 1);
         A2 = A.transpose() * A;
         b2 = A.transpose() * b;
-
-
 
         solver.compute(A2);
         if(solver.info()!=Eigen::Success) {
@@ -179,17 +183,20 @@ int main(int argc, char* argv[])
 
     }
 
-    // 
+    // turn into a Skeletonization part
     double sample_radius = 0.002;
-
     Eigen::MatrixXd nodes;
     Eigen::VectorXi correspondences;
     farthest_sampling_by_sphere(P, sample_radius, nodes, correspondences);
 
     Eigen::MatrixXi adjacency_matrix;
     connect_by_inherit_neigh(V, nodes, correspondences, one_ring_list, adjacency_matrix);
+    edge_collapse_update(nodes, correspondences, adjacency_matrix);
 
-adjacency_matrix = adjacency_matrix.unaryExpr([](int x) { return std::min(x, 1); });
+
+
+
+
 
 
 
@@ -206,20 +213,9 @@ for (int i=0; i<V.rows(); i++)
     vertices_color(i, 1) = 1-fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
     vertices_color(i, 2) = 1-fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
 }
-/*
-vertices_color.col(0) = correspondences/nodes.rows()*modulo_factor;
-vertices_color.col(1) = Eigen::VectorXd::Constant(V.rows(), 1)-correspondences/nodes.rows()*modulo_factor;
-vertices_color.col(2) = Eigen::VectorXd::Constant(V.rows(), 1)-correspondences/nodes.rows()*modulo_factor;
-
-vertices_color =  vertices_color.array() - (1 * (vertices_color.array()/1));
-*/
 plot_mesh (V, F, vertices_color);
 
-//std::cout<<"nodes:\n" << nodes << "\n";
-//std::cout<<"correspondences:\n" << correspondences.transpose() << "\n";
 
-
-    edge_collapse_update(nodes, correspondences, adjacency_matrix);
 
 
 

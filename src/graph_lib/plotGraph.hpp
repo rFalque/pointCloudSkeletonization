@@ -23,7 +23,7 @@
 #include "../external_library/directional/point_spheres.h"
 
 #include "getMinMax.hpp"
-#include "options.hpp"
+#include "graphOptions.hpp"
 
 inline bool add_graph (igl::opengl::glfw::Viewer & viewer,
                         const Eigen::MatrixXd & nodes,

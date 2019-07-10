@@ -22,7 +22,6 @@ find_package(LIBIGL REQUIRED QUIET)
 
 find_package(OpenGL REQUIRED)
 
-
 file(GLOB SRCFILES main.cpp)
 
 add_executable(${PROJECT_NAME}_bin ${SRCFILES})

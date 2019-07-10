@@ -6,7 +6,7 @@
 #include <limits>
 #include "readGraphOBJ.hpp"
 #include "plotGraph.hpp"
-#include "options.hpp"
+#include "graphOptions.hpp"
 
 
 /* TODO: check adjacency_list
@@ -16,7 +16,6 @@
  * 
  * 		- merge 	Graph(Eigen::MatrixXd nodes, Eigen::MatrixXi adjacency_matrix)
  * 					Graph(Eigen::MatrixXd nodes, Eigen::Matrix<int, Eigen::Dynamic, 2> edges)
- * 
  */
 
 class Graph
@@ -53,7 +52,6 @@ private:
 	void DFSUtil(int u, std::vector< std::vector<int> > adj, std::vector<bool> &visited);
 	void APUtil(int u, std::vector<bool> & visited, int disc[], int low[], std::vector<int> & parent, std::vector<bool> & ap);
 	void bridgeUtil(int u, std::vector<bool> & visited, int disc[], int low[], std::vector<int> & parent, std::vector< std::pair<int, int> > & bridges);
-	void dfs_cycle(int u, int p, std::vector <int> & color, std::vector <int> & mark, std::vector <int> & par, int& cyclenumber);
 	bool is_element_in_vector(int a, std::vector<int> & A, int & element_position);
 
 public:
@@ -117,8 +115,10 @@ public:
 		set_default_options();
 	}
 
+
 	// destructor
-	~Graph(){
+	~Graph()
+	{
 	}
 
 	// initialisation of the private variables
@@ -151,8 +151,8 @@ public:
 	bool set_default_options()
 	{
 		opts_.verbose = false;
-		opts_.nodes_ratio = 200.0;
-		opts_.edges_ratio = 400.0;
+		opts_.nodes_ratio = 50.0;
+		opts_.edges_ratio = 200.0;
 		opts_.graph_res = 30.0;
 		opts_.nodes_color = {1.0, 0.1, 0.1};
 		opts_.edges_color = {0.1, 0.1, 0.1};
@@ -182,15 +182,15 @@ public:
 		}
 	}
 
-	bool plot()
-	{
+	bool plot() {
 		return plot_graph(nodes_, edges_, opts_);
 	}
 
-	bool augment_connectivity()
+	bool print_isolated_vertices()
 	{
-		// TBD
-		return true;
+		for (int i=0; i<num_nodes_; i++)
+			if (adjacency_list_[i].size() == 0)
+				std::cout << "Isolated vertices at: " << i << std::endl;
 	}
 
 	int num_nodes()
@@ -203,10 +203,184 @@ public:
 		return num_edges_;
 	}
 
+	bool remove_node(int nodeToRemove) 
+	{
+		// remove node
+		removeRow(nodes_, nodeToRemove);
+
+		// remove related edges
+		std::vector<int> edges_to_remove = adjacency_edge_list_[nodeToRemove];
+		std::sort(edges_to_remove.begin(), edges_to_remove.end(), std::greater<int>());
+		for (int edge_iterator=0; edge_iterator<edges_to_remove.size(); edge_iterator++)
+			removeRow(edges_, edges_to_remove[edge_iterator]);
+
+		// update the edge nodes index (we have one less node now)
+		for (int i=0; i<edges_.rows(); i++)
+			for (int j=0; j<edges_.cols(); j++)
+				if (edges_(i,j) >= nodeToRemove)
+					edges_(i,j)--;
+
+		init();
+
+		return true;
+	}
+
+	bool add_node(Eigen::Vector3d node, std::vector<int> neighbours)
+	{
+		// add node
+		Eigen::MatrixXd temp_nodes = nodes_;
+		nodes_.resize(nodes_.rows()+1, 3);
+		nodes_ << temp_nodes, node.transpose();
+		
+		// add related edges
+		Eigen::MatrixXi temp_edges = edges_;
+		Eigen::MatrixXi edges_to_add(neighbours.size(), 2);
+		for (int edge_iterator=0; edge_iterator<neighbours.size(); edge_iterator++)
+			edges_to_add.row(edge_iterator) << nodes_.rows()-1, neighbours[edge_iterator];
+		
+		edges_.resize(temp_edges.rows()+edges_to_add.rows(), 2);
+		edges_ << temp_edges, edges_to_add;
+
+		init();
+
+		return true;
+	}
+
+	bool collapse_edge(int edge_id)
+	{
+		// get nodes_id:
+		int node_1 = edges_(edge_id, 0);
+		int node_2 = edges_(edge_id, 1);
+
+		// merge the two previous ones
+		Eigen::Vector3d fused_node = (nodes_.row(node_1) + nodes_.row(node_2) ) / 2;
+
+		// get the connected neighbours
+		std::vector<int> neighbours;
+		neighbours = adjacency_list_[node_1];
+		neighbours.insert( neighbours.end(), adjacency_list_[node_2].begin(), adjacency_list_[node_2].end() );
+
+		// remove old nodes
+		neighbours.erase(std::remove(neighbours.begin(), neighbours.end(), node_1), neighbours.end());
+		neighbours.erase(std::remove(neighbours.begin(), neighbours.end(), node_2), neighbours.end());
+
+		sort( neighbours.begin(), neighbours.end() );
+		neighbours.erase( unique( neighbours.begin(), neighbours.end() ), neighbours.end() );
+
+		// add node
+		add_node(fused_node, neighbours);
+		
+		// remove the previous nodes (the order matter)
+		if (node_2<node_1) {
+			remove_node(node_1);
+			remove_node(node_2);
+		} else {
+			remove_node(node_2);
+			remove_node(node_1);
+		}
+
+		return true;
+	}
+
+	// this could be improve by using the list of cycles and collapsing the smallest edge in each cycle
+	bool make_1D_curve()
+	{
+		bool verbose_temp = opts_.verbose;
+		opts_.verbose = false;
+
+		// check for bridges
+		has_bridges_ = -1;
+		has_bridges();
+
+		while (bridges_.size() != num_edges_)
+		{
+
+			// list all non bridges
+			std::vector <int> edges_to_edit;
+			for (int i=0; i<num_edges_; i++) {
+				bool edge_to_add = true;
+				for (int j=0; j<bridges_.size(); j++) {
+					if ( (edges_(i, 0)==bridges_[j].first && edges_(i, 1)==bridges_[j].second) || 
+					     (edges_(i, 1)==bridges_[j].first && edges_(i, 0)==bridges_[j].second) ) {
+						edge_to_add = false;
+						break;
+					}
+				}
+				if (edge_to_add)
+					edges_to_edit.push_back(i);
+			}
+
+			collapse_edge(edges_to_edit[0]);
+
+			// check for bridges
+			has_bridges_ = -1;
+			has_bridges();
+		}
+
+		opts_.verbose = verbose_temp;
+		return true;
+	}
+
+	double dijkstra(int source, int target) 
+	{
+		// initialization
+		double distance_source_to_target;
+		std::vector<double> min_distance(num_nodes_, std::numeric_limits<double>::infinity());
+		min_distance.at(source) = 0;
+
+		// set the set of visited nodes:
+		std::vector<int> visited;
+		std::vector<int> to_visit;
+
+		// initialize the node to start from
+		int u = source;
+		int element_position;
+
+		// start searching
+		bool target_found;
+		while (!target_found)
+		{
+			for (int i = 0; i < adjacency_list_.at(u).size(); ++i)
+			{
+				int neighbour_node = adjacency_list_.at(u).at(i);
+				double edge_length = edges_length_(adjacency_edge_list_.at(u).at(i));
+				if (not is_element_in_vector(neighbour_node, to_visit, element_position))
+					if (not is_element_in_vector(neighbour_node, visited, element_position))
+						to_visit.push_back(neighbour_node);
+				
+				if ( min_distance.at(u) + edge_length < min_distance.at( neighbour_node ) )
+					min_distance.at( neighbour_node ) = min_distance.at(u) +  edge_length;
+			}
+
+			visited.push_back(u);
+
+			// check if the visited point is in sub_V
+			target_found = is_element_in_vector(target, visited, element_position);
+
+			// set next u
+			int index_of_next_point = 0;
+			for (int i = 0; i < to_visit.size(); ++i)
+				if (min_distance.at( to_visit.at(i) ) < min_distance.at( to_visit.at( index_of_next_point) ) )
+					index_of_next_point = i;
+
+
+			// check if all vertices have been visited:
+			if (to_visit.size() == 0)
+				break;
+
+			u = to_visit.at(index_of_next_point);
+			to_visit.erase(to_visit.begin() + index_of_next_point);
+
+		}
+		
+		return min_distance.at(target);
+	}
+
+
+	/* CONNECTIVITY TESTS */
 	bool is_connected()
 	{
-		if (is_connected_ == -1)
-		{
+		if (is_connected_ == -1) {
 			// check for graph connectivity using DFS:
 			std::vector<bool> visited(num_nodes_, false);
 			DFSUtil(0, adjacency_list_, visited);
@@ -216,8 +390,7 @@ public:
 				std::cout << "graph is connected: " << is_connected_ << std::endl;
 
 			// if not connected, update the next ones
-			if (is_connected_ == 0)
-			{
+			if (is_connected_ == 0) {
 				is_biconnected_ = 0;
 				is_triconnected_ = 0;
 			}
@@ -272,7 +445,7 @@ public:
 	// return the set of two cut vertices
 	bool is_triconnected(std::vector< std::pair<int, int> >& two_cut_vertices)
 	{ 
-		/* this function run in quadratic time, this is not the most efficient to do it
+		/* this function run in quadratic time, this is not the most efficient way to do it
 		 * for alternative, see these papers:
 		 * - Finding the Triconnected Components of a Graph (1972)
 		 * - A Linear Time Implementation of SPQR-Trees (2000)
@@ -359,6 +532,8 @@ public:
 		return has_bridges(bridges);
 	}
 
+
+	/* TO BE REMOVED? */
 	int adj(int i, int j)
 	{
 		return adjacency_list_[i][j];
@@ -369,191 +544,16 @@ public:
 		return edges_(i, 0);
 	}
 
-	int edge_target(int i)
+	int edge_target(int i) 
 	{
 		return edges_(i, 1);
 	}
 
-	void swap_edge(int i)
+	void swap_edge(int i) 
 	{
 		int temp = edges_(i,0);
 		edges_(i,0) = edges_(i,1);
 		edges_(i,1) = temp;
-	}
-
-	int get_node_degree(int i)
-	{
-		return adjacency_list_[i].size();
-	}
-
-	void remove_node(int nodeToRemove)
-	{
-		// remove node
-		removeRow(nodes_, nodeToRemove);
-
-		// remove related edges
-		std::vector<int> edges_to_remove = adjacency_edge_list_[nodeToRemove];
-		std::sort(edges_to_remove.begin(), edges_to_remove.end(), std::greater<int>());
-		for (int edge_iterator=0; edge_iterator<edges_to_remove.size(); edge_iterator++)
-			removeRow(edges_, edges_to_remove[edge_iterator]);
-
-		// update the edge nodes index (we have one less node now)
-		for (int i=0; i<edges_.rows(); i++)
-			for (int j=0; j<edges_.cols(); j++)
-				if (edges_(i,j) >= nodeToRemove)
-					edges_(i,j)--;
-
-		init();
-	}
-
-	double dijkstra(int source, int target)
-	{
-		// initialization
-		double distance_source_to_target;
-		std::vector<double> min_distance(num_nodes_, std::numeric_limits<double>::infinity());
-		min_distance.at(source) = 0;
-
-		// set the set of visited nodes:
-		std::vector<int> visited;
-		std::vector<int> to_visit;
-
-		// initialize the node to start from
-		int u = source;
-		int element_position;
-
-		// start searching
-		bool target_found;
-		while (!target_found)
-		{
-			for (int i = 0; i < adjacency_list_.at(u).size(); ++i)
-			{
-				int neighbour_node = adjacency_list_.at(u).at(i);
-				double edge_length = edges_length_(adjacency_edge_list_.at(u).at(i));
-				if (not is_element_in_vector(neighbour_node, to_visit, element_position))
-					if (not is_element_in_vector(neighbour_node, visited, element_position))
-						to_visit.push_back(neighbour_node);
-				
-				if ( min_distance.at(u) + edge_length < min_distance.at( neighbour_node ) )
-					min_distance.at( neighbour_node ) = min_distance.at(u) +  edge_length;
-			}
-
-			visited.push_back(u);
-
-			// check if the visited point is in sub_V
-			target_found = is_element_in_vector(target, visited, element_position);
-
-			// set next u
-			int index_of_next_point = 0;
-			for (int i = 0; i < to_visit.size(); ++i)
-				if (min_distance.at( to_visit.at(i) ) < min_distance.at( to_visit.at( index_of_next_point) ) )
-					index_of_next_point = i;
-
-
-			// check if all vertices have been visited:
-			if (to_visit.size() == 0)
-				break;
-
-			u = to_visit.at(index_of_next_point);
-			to_visit.erase(to_visit.begin() + index_of_next_point);
-
-		}
-		
-		return min_distance.at(target);
-	}
-
-	bool print_isolated_vertices()
-	{
-		for (int i=0; i<num_nodes_; i++)
-			if (adjacency_list_[i].size() == 0)
-				std::cout << "Isolated vertices at: " << i << std::endl;
-	}
-
-	bool add_node(Eigen::Vector3d node, std::vector<int> neighbours)
-	{
-		// add node
-		Eigen::MatrixXd temp_nodes = nodes_;
-		nodes_.resize(nodes_.rows()+1, 3);
-		nodes_ << temp_nodes, node.transpose();
-		
-		// add related edges
-		Eigen::MatrixXi temp_edges = edges_;
-		Eigen::MatrixXi edges_to_add(neighbours.size(), 2);
-		for (int edge_iterator=0; edge_iterator<neighbours.size(); edge_iterator++)
-			edges_to_add.row(edge_iterator) << nodes_.rows()-1, neighbours[edge_iterator];
-		
-		edges_.resize(temp_edges.rows()+edges_to_add.rows(), 2);
-		edges_ << temp_edges, edges_to_add;
-
-		init();
-	}
-
-	bool collapse_edge(int edge_id)
-	{
-		// get nodes_id:
-		int node_1 = edges_(edge_id, 0);
-		int node_2 = edges_(edge_id, 1);
-
-		// merge the two previous ones
-		Eigen::Vector3d fused_node = (nodes_.row(node_1) + nodes_.row(node_2) ) / 2;
-
-		// get the connected neighbours
-		std::vector<int> neighbours;
-		neighbours = adjacency_list_[node_1];
-		neighbours.insert( neighbours.end(), adjacency_list_[node_2].begin(), adjacency_list_[node_2].end() );
-
-		// remove old nodes
-		neighbours.erase(std::remove(neighbours.begin(), neighbours.end(), node_1), neighbours.end());
-		neighbours.erase(std::remove(neighbours.begin(), neighbours.end(), node_2), neighbours.end());
-
-		sort( neighbours.begin(), neighbours.end() );
-		neighbours.erase( unique( neighbours.begin(), neighbours.end() ), neighbours.end() );
-
-		// add node
-		add_node(fused_node, neighbours);
-		
-		// remove the previous nodes
-		if (node_2<node_1) {
-			remove_node(node_1);
-			remove_node(node_2);
-		} else {
-			remove_node(node_2);
-			remove_node(node_1);
-		}
-	}
-
-	bool collapse_triangles()
-	{
-
-		// check for bridges
-		has_bridges_ = -1;
-		has_bridges();
-
-		while (bridges_.size() != num_edges_)
-		{
-
-			// list all non bridges
-			std::vector <int> edges_to_edit;
-			for (int i=0; i<num_edges_; i++) {
-				bool edge_to_add = true;
-				for (int j=0; j<bridges_.size(); j++) {
-					if ( (edges_(i, 0)==bridges_[j].first && edges_(i, 1)==bridges_[j].second) || 
-					     (edges_(i, 1)==bridges_[j].first && edges_(i, 0)==bridges_[j].second) ) {
-						edge_to_add = false;
-						break;
-					}
-				}
-				if (edge_to_add)
-					edges_to_edit.push_back(i);
-			}
-
-			collapse_edge(edges_to_edit[0]);
-
-			// check for bridges
-			has_bridges_ = -1;
-			has_bridges();
-		}
-
-		return true;
 	}
 
 };
@@ -565,10 +565,10 @@ void Graph::removeRow(Eigen::MatrixXd& matrix, unsigned int rowToRemove)
     unsigned int numCols = matrix.cols();
 
     if( rowToRemove < numRows )
-        matrix.block(rowToRemove,0,numRows-rowToRemove,numCols) = matrix.block(rowToRemove+1,0,numRows-rowToRemove,numCols);
+        matrix.block(rowToRemove,0,numRows-rowToRemove,numCols) = matrix.bottomRows(numRows-rowToRemove);
 
     matrix.conservativeResize(numRows,numCols);
-}
+};
 
 void Graph::removeRow(Eigen::MatrixXi& matrix, unsigned int rowToRemove)
 {
@@ -576,7 +576,7 @@ void Graph::removeRow(Eigen::MatrixXi& matrix, unsigned int rowToRemove)
     unsigned int numCols = matrix.cols();
 
     if( rowToRemove < numRows )
-        matrix.block(rowToRemove,0,numRows-rowToRemove,numCols) = matrix.block(rowToRemove+1,0,numRows-rowToRemove,numCols);
+        matrix.block(rowToRemove,0,numRows-rowToRemove,numCols) = matrix.bottomRows(numRows-rowToRemove);
 
     matrix.conservativeResize(numRows,numCols);
 };
@@ -641,14 +641,12 @@ void Graph::APUtil(int u, std::vector<bool> & visited, int disc[],
 	// Initialize discovery time and low value 
 	disc[u] = low[u] = ++time; 
 
-	for (int i=0; i<adjacency_list_[u].size(); i++)
-	{ 
+	for (int i=0; i<adjacency_list_[u].size(); i++) { 
 		int v = adjacency_list_[u][i];  // v is current adjacent of u 
 
 		// If v is not visited yet, then make it a child of u 
 		// in DFS tree and recur for it 
-		if (!visited[v]) 
-		{ 
+		if (!visited[v]) { 
 			children++; 
 			parent[v] = u; 
 			APUtil(v, visited, disc, low, parent, ap); 
@@ -691,7 +689,7 @@ void Graph::bridgeUtil(int u,
 					   int disc[], 
 					   int low[], 
 					   std::vector<int> & parent, 
-					   std::vector< std::pair<int, int> > & bridges)
+					   std::vector< std::pair<int, int> > & bridges) 
 { 
     // A static variable is used for simplicity, we can  
     // avoid use of static variable by passing a pointer. 
@@ -704,13 +702,11 @@ void Graph::bridgeUtil(int u,
     disc[u] = low[u] = ++time; 
   
     // Go through all vertices aadjacent to this 
-    for (int i=0; i<adjacency_list_[u].size(); i++)
-	{ 
+    for (int i=0; i<adjacency_list_[u].size(); i++) { 
 		int v = adjacency_list_[u][i];  // v is current adjacent of u 
   
         // If v is not visited yet, then recur for it 
-        if (!visited[v]) 
-        { 
+        if (!visited[v]) { 
             parent[v] = u; 
             bridgeUtil(v, visited, disc, low, parent, bridges); 
   
@@ -723,7 +719,7 @@ void Graph::bridgeUtil(int u,
             // If the lowest vertex reachable from subtree  
             // under v is  below u in DFS tree, then u-v  
             // is a bridge 
-            if (low[v] > disc[u]) 
+            if (low[v] > disc[u] && opts_.verbose) 
               std::cout << "Bridge at: " << u << " " << v << std::endl;
         } 
   
@@ -733,20 +729,18 @@ void Graph::bridgeUtil(int u,
     } 
 };
 
-
 bool Graph::is_element_in_vector(int a, std::vector<int> & A, int & element_position)
 {
 	bool point_is_in_set = false;
 
 	for (int i = 0; i < A.size(); ++i)
-		if ( a == A.at(i) )
-		{
+		if ( a == A.at(i) ) {
 			element_position = i;
 			point_is_in_set = true;
 		}
 
 	return point_is_in_set;
-};
+}
 
 
 #endif
