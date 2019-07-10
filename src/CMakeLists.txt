@@ -4,7 +4,7 @@ project(skeleton_extraction)
 
 add_subdirectory(external_library)
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -29,13 +29,13 @@ add_executable(${PROJECT_NAME}_bin ${SRCFILES})
 set_target_properties(${PROJECT_NAME}_bin PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
 
 include_directories(${PROJECT_NAME}_bin
-			${PROJECT_SOURCE_DIR}/external_library/
-			${YAML_CPP_INCLUDE_DIR}
-			${EIGEN3_INCLUDE_DIR})
+			        ${PROJECT_SOURCE_DIR}/external_library/
+			        ${YAML_CPP_INCLUDE_DIR}
+			        ${EIGEN3_INCLUDE_DIR})
 
 target_link_libraries(${PROJECT_NAME}_bin
-			${YAML_CPP_LIBRARIES}
-			igl::core
-			igl::opengl
-			igl::opengl_glfw)
+			          ${YAML_CPP_LIBRARIES}
+			          igl::core
+			          igl::opengl
+			          igl::opengl_glfw)
 
