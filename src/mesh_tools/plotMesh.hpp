@@ -94,4 +94,22 @@ inline bool plot_mesh (const Eigen::MatrixXd& V,
     return plot_mesh (V, F, vertices_color);
 };
 
+inline bool plot_mesh_and_cloud (const Eigen::MatrixXd& V,
+                                 const Eigen::MatrixXi& F,
+                                 const Eigen::MatrixXd& points)
+{
+    Eigen::MatrixXd vertices_color;
+    vertices_color = Eigen::MatrixXd::Constant(V.rows(), 3, 0.9);
+    
+    // plot mesh
+    igl::opengl::glfw::Viewer viewer;
+    add_mesh (viewer, V, F, vertices_color);
+    viewer.data().add_points(points, Eigen::RowVector3d(0.2, 0, 0));
+    viewer.data().point_size = 2;
+    viewer.launch();
+
+    return true;
+};
+
+
 #endif
