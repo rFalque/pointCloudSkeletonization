@@ -54,10 +54,10 @@
 
 
 /* TODO:
- *  - add upper bound to avoid division by 0
- *  - add stopping criteria
- *  - test the radius search in the nanoflann wrapper
- *  - test without the normalization or inverse it afterwards
+ *  - compute sample_radius from cloud
+ *  - test without the normalization
+ *  - update the correspondence
+ *  - return the parameters
  */
 
 int main(int argc, char* argv[])
