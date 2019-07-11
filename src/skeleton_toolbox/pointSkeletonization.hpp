@@ -16,7 +16,10 @@
 #include "connect_by_inherit_neigh.hpp"
 
 #include "../utils/options.hpp"
-//#include "../utils/matplotlibcpp.h"
+#include "../utils/EigenConcatenate.hpp"
+#include "../utils/EigenTools.hpp"
+#include "../utils/EigenMinMax.hpp"
+#include "../utils/matplotlibcpp.h"
 
 class PointSkeletonization
 {
@@ -25,12 +28,19 @@ private:
 
     Eigen::MatrixXd pointcloud_;                                        // pointcloud
 	Eigen::MatrixXd contracted_pointcloud_;                             // contracted pointcloud
+	Eigen::VectorXi correspondences_;                                    // association between each point from pointcloud_ and the nodes of the skeleton
 	
     Eigen::MatrixXi F_;                                                 // F: faces of the surface (for plots)
 	
 	std::vector< OneRing > one_ring_list_;
 
-	Graph* skeleton;
+	Graph* skeleton_;
+
+    bool initialized_ = false;
+
+    // normalization factor
+    Eigen::Vector3d nomalization_deplacement_;
+    double normalization_scaling_;
 
     // internal functions
 	inline bool normalization();
@@ -41,7 +51,6 @@ private:
                                              Eigen::SparseMatrix<double> WL, 
                                              Eigen::SparseMatrix<double> L, 
                                              Eigen::MatrixXd points);
-
 public:
 
 	// overloaded creations of the class (set verbose and load the data)
@@ -79,30 +88,27 @@ public:
 			one_ring_list_.push_back(one_ring);
 		}
 
+        initialized_ = true;
 		return true;
 	}
 
 	bool laplacian_contraction() 
     {
+        if ( not initialized_ )
+            init();
+
         // store the contraction for each step
         std::vector<double> contraction_history;
 
 	    // initialization of: WH, WL, and L
-		Eigen::VectorXd ms;
-    	ms = one_ring_size(pointcloud_, one_ring_list_, "mean");
+    	Eigen::VectorXd ms = one_ring_size(pointcloud_, one_ring_list_, "mean");
     	double initWL = 1.0/(5.0*ms.mean());
 
-		Eigen::SparseMatrix<double> WL(pointcloud_.rows(), pointcloud_.rows());
-		for (int i=0; i<pointcloud_.rows(); i++)
-			WL.insert(i,i) = initWL;
-
-		Eigen::SparseMatrix<double> WH(pointcloud_.rows(), pointcloud_.rows());
-		for (int i=0; i<pointcloud_.rows(); i++)
-			WH.insert(i,i) = 1;
+        Eigen::SparseMatrix<double> WL = SparseDiagonalMatrix::Constant(pointcloud_.rows(), initWL);
+        Eigen::SparseMatrix<double> WH = SparseDiagonalMatrix::Constant(pointcloud_.rows(), 1);
 
 		// get laplacian
 	    Eigen::SparseMatrix<double> L = laplacian(pointcloud_, one_ring_list_);
-        std::cout << "L(1,1) = " << L.coeffRef(0,0) << std::endl;
 
 		contracted_pointcloud_ = solve_contraction(WH, WL, L, pointcloud_);
 
@@ -112,15 +118,17 @@ public:
         double sl = opts_.sl;
         double WC = opts_.WC;
 
-        plot_mesh_and_cloud (contracted_pointcloud_, F_, pointcloud_);
+        if (opts_.visualization)
+            plot_mesh_and_cloud (contracted_pointcloud_, F_, pointcloud_);
         Eigen::VectorXd size = one_ring_size(pointcloud_, one_ring_list_, "min");
 
         for (int i=0; i< iteration_time; i++) {
 
             Eigen::VectorXd new_size = one_ring_size(contracted_pointcloud_, one_ring_list_, "min");
-            contraction_history.push_back(new_size.sum() / size.sum() );
-            if (contraction_history.back() < opts_.termination_criteria)
-                break;
+            contraction_history.push_back(new_size.mean() / size.mean() );
+            if (contraction_history.size()>2)
+                if (contraction_history.rbegin()[1] - contraction_history.rbegin()[0] < opts_.termination_criteria)
+                    break;
 
             std::cout<<"previous contraction ratio : "<< contraction_history.back() <<"\n";
             std::cout<<"contraction step : "<< i+1 <<"\n";
@@ -146,69 +154,99 @@ public:
                     WL.coeffRef(i,i) = opts_.MAX_LAPLACIAN_CONSTRAINT_WEIGHT;
             }
 
-
             // recompute L
             L = laplacian(contracted_pointcloud_, one_ring_list_);
 
             // i^th +1 contraction
             contracted_pointcloud_ = solve_contraction(WH, WL, L, contracted_pointcloud_);
             
-            if (i > 1)
+            if (opts_.visualization)
                 plot_mesh_and_cloud (contracted_pointcloud_, F_, pointcloud_);
+        }
+
+        if (opts_.visualization)
+        {
+            std::vector <int> x(contraction_history.size());
+            std::iota(x.begin(), x.end(), 0);
+            
+            matplotlibcpp::plot(x, contraction_history);
+            matplotlibcpp::title("Contraction history:");
+            matplotlibcpp::show();
         }
 	}
 
     bool skeletonization() 
     {
-        
         // turn into a Skeletonization part
-        double sample_radius = 0.002;
+        double sample_radius;
+        getScale(pointcloud_, sample_radius);
+        sample_radius *= opts_.sample_radius;
+
         Eigen::MatrixXd nodes;
         Eigen::VectorXi correspondences;
         farthest_sampling_by_sphere(contracted_pointcloud_, sample_radius, nodes, correspondences);
+
+
+
+
 
         Eigen::MatrixXi adjacency_matrix;
         connect_by_inherit_neigh(pointcloud_, nodes, correspondences, one_ring_list_, adjacency_matrix);
 
 
         // Graph skeleton(nodes, adjacency_matrix);
-        skeleton = new Graph(nodes, adjacency_matrix);
-        skeleton->init();
-        skeleton->make_1D_curve();
-        skeleton->plot();
+        std::vector<std::vector <int> > merged_nodes;
+        skeleton_ = new Graph(nodes, adjacency_matrix);
+        skeleton_->init();
+        skeleton_->plot();
+        merged_nodes = skeleton_->make_1D_curve();
+        skeleton_->plot();
+
+        if (opts_.verbose) {
+            std::cout << "Nodes merged together:\n";
+            for (int i=0; i<merged_nodes.size(); i++) {
+                std::cout << "The " << i << "-th point now contains the points: ";
+                for (int j=0; j<merged_nodes[i].size(); j++) {
+                    std::cout << merged_nodes[i][j] << " ";
+                }
+                std::cout << "\n";
+            }
+        }
+
+        // update the point correspondence
+        Eigen::VectorXi updated_correspondences = Eigen::VectorXi::Constant(correspondences.rows(), -1);
+
+        for (int k=0; k<correspondences.rows(); k++) 
+            for (int i=0; i<merged_nodes.size(); i++)
+                for (int j=0; j<merged_nodes[i].size(); j++)
+                        if (correspondences(k) == merged_nodes[i][j])
+                            updated_correspondences(k) = i;
         
-    }
+        std::cout << "correspondences.max" << correspondences.maxCoeff() << "\n";
 
-    bool plot_contraction_progress()
-    {
+        if ( (updated_correspondences.array() == -1).any() )
+            std::cout << "Oh noooooo\n'";
         
+        correspondences_ = updated_correspondences;
+
+        return true;
     }
 
+    Eigen::VectorXi get_correspondences() {
+        return correspondences_;
+    }    
 
-    bool plot_contracted_mesh()
-    {
-
-    }
-/*
-	bool set_default_options()
-	{
-		opts_.verbose = false;
-		opts_.nodes_ratio = 50.0;
-		opts_.edges_ratio = 200.0;
-		opts_.graph_res = 30.0;
-		opts_.nodes_color = {1.0, 0.1, 0.1};
-		opts_.edges_color = {0.1, 0.1, 0.1};
-	}
-*/
 };
 
 inline bool PointSkeletonization::normalization()
 {
     // centre in zero
-    pointcloud_.rowwise() -= (pointcloud_.colwise().minCoeff() + pointcloud_.colwise().maxCoeff()) / 2;
+    nomalization_deplacement_ = (pointcloud_.colwise().minCoeff() + pointcloud_.colwise().maxCoeff()) / 2;
+    pointcloud_.rowwise() -= nomalization_deplacement_.transpose();
 
     // make the diagonal 1.6
-    pointcloud_ *= 1.6/(pointcloud_.colwise().maxCoeff() - pointcloud_.colwise().minCoeff()).maxCoeff();
+    normalization_scaling_ = 1.6/(pointcloud_.colwise().maxCoeff() - pointcloud_.colwise().minCoeff()).maxCoeff();
+    pointcloud_ *= normalization_scaling_;
 
     return true;
 };
@@ -344,7 +382,7 @@ inline Eigen::SparseMatrix<double> PointSkeletonization::laplacian(Eigen::Matrix
 
         if (require_normalization)
         {
-            std::cout << "Warning: very high laplacian value reached: cot_theta=" << max_cot_value << std::endl;
+            //std::cout << "Warning: very high laplacian value reached: cot_theta=" << max_cot_value << std::endl;
             for (int j=0; j<one_ring.size(); j++) {
                 L_2.coeffRef(i, one_ring[j]) *= opts_.laplacian_threshold / max_cot_value;
             }
@@ -381,6 +419,8 @@ inline Eigen::MatrixXd PointSkeletonization::solve_contraction(Eigen::SparseMatr
     }
     return solver.solve(b2);
 };
+
+
 
 
 #endif

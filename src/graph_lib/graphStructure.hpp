@@ -283,8 +283,18 @@ public:
 	}
 
 	// this could be improve by using the list of cycles and collapsing the smallest edge in each cycle
-	bool make_1D_curve()
+	std::vector<std::vector <int> >  make_1D_curve()
 	{
+		std::vector<std::vector <int> > nodes_references(num_nodes_);
+		for (int i=0; i<num_nodes_; i++)
+			nodes_references[i].push_back(i);
+		
+std::cout << "nodes_references: ";
+for (int i=0; i<num_nodes_; i++)
+	std::cout << nodes_references[i][0] << " ";
+std::cout << std::endl;
+
+
 		bool verbose_temp = opts_.verbose;
 		opts_.verbose = false;
 
@@ -310,7 +320,43 @@ public:
 					edges_to_edit.push_back(i);
 			}
 
-			collapse_edge(edges_to_edit[0]);
+
+std::cout << "edges_to_edit: ";
+for (int i=0; i<edges_to_edit.size(); i++)
+	std::cout << edges_to_edit[i] << " ";
+std::cout << std::endl;
+
+std::cout << "edge[0]: " << edges_(0, 0) << "-" << edges_(0, 1) << std::endl;
+
+
+			int edge_to_edit = 0;
+
+			// this is used to keep track of who the nodes have been merged
+			std::vector<int> merged_nodes;
+			merged_nodes.insert( merged_nodes.end(), nodes_references[edges_(edge_to_edit, 0)].begin(), nodes_references[edges_(edge_to_edit, 0)].end() );
+			merged_nodes.insert( merged_nodes.end(), nodes_references[edges_(edge_to_edit, 1)].begin(), nodes_references[edges_(edge_to_edit, 1)].end() );
+			
+			if (edges_(edge_to_edit, 0) > edges_(edge_to_edit, 1)) {
+				nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 0));
+				nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 1));
+			} else {
+				nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 1));
+				nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 0));
+			}
+
+			nodes_references.push_back(merged_nodes);
+
+
+std::cout << "Nodes merged together:\n";
+for (int i=0; i<nodes_references.size(); i++) {
+	std::cout << "The " << i << "-th point now contains the points: ";
+	for (int j=0; j<nodes_references[i].size(); j++) {
+		std::cout << nodes_references[i][j] << " ";
+	}
+	std::cout << "\n";
+}
+
+			collapse_edge(edges_to_edit[edge_to_edit]);
 
 			// check for bridges
 			has_bridges_ = -1;
@@ -318,7 +364,8 @@ public:
 		}
 
 		opts_.verbose = verbose_temp;
-		return true;
+
+		return nodes_references;
 	}
 
 	double dijkstra(int source, int target) 

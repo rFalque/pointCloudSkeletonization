@@ -22,7 +22,7 @@
 #include "../external_library/directional/line_cylinders.h"
 #include "../external_library/directional/point_spheres.h"
 
-#include "getMinMax.hpp"
+#include "../utils/EigenMinMax.hpp"
 #include "graphOptions.hpp"
 
 inline bool add_graph (igl::opengl::glfw::Viewer & viewer,

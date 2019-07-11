@@ -8,6 +8,9 @@ set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# matplotlib support
+find_package(PythonLibs 2.7)
+
 # specific version of eigen needed
 find_package(Eigen3 3.2.10 EXACT REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
@@ -31,11 +34,13 @@ set_target_properties(${PROJECT_NAME}_bin PROPERTIES CXX_STANDARD 11 CXX_STANDAR
 include_directories(${PROJECT_NAME}_bin
 			        ${PROJECT_SOURCE_DIR}/external_library/
 			        ${YAML_CPP_INCLUDE_DIR}
-			        ${EIGEN3_INCLUDE_DIR})
+					${EIGEN3_INCLUDE_DIR}
+					${PYTHON_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME}_bin
 			          ${YAML_CPP_LIBRARIES}
 			          igl::core
 			          igl::opengl
-			          igl::opengl_glfw)
+					  igl::opengl_glfw
+					  ${PYTHON_LIBRARIES})
 

@@ -1,5 +1,5 @@
 /*
- * Eigen tools
+ * from https://github.com/libigl/libigl/blob/master/include/igl/list_to_matrix.cpp
  * by R. Falque
  * 03/07/2019
  */
@@ -22,7 +22,11 @@ inline bool list_to_matrix(const std::vector<std::vector<T > > & V,Eigen::PlainO
     return true;
   }
   // number of columns
+  
+  /* BEGIN OF EDIT: REMOVE CHECK FOR ALL ROWS HAVING THE SAME VALUE */
   int n = V[0].size();
+  /* END OF EDIT */
+
   assert(n != -1);
   // Resize output
   M.resize(m,n);
@@ -107,5 +111,14 @@ inline bool list_to_matrix(const std::vector<T > & V,Eigen::PlainObjectBase<Deri
 
   return true;
 };
+
+namespace SparseDiagonalMatrix {
+    inline Eigen::SparseMatrix<double> Constant(int size, double value) {
+      Eigen::SparseMatrix<double> sparse_matrix(size, size);
+      for (int i=0; i<size; i++)
+        sparse_matrix.insert(i,i) = value;
+      return sparse_matrix;
+    };
+}
 
 #endif

@@ -67,6 +67,13 @@ inline bool farthest_sampling_by_sphere(Eigen::MatrixXd & in_cloud, double sampl
         }
     }
 
+    correspondences = correspondences.array() - 1;
+    if ( (correspondences.array() == -1).any() )
+    {
+        std::cout << "point without correspondences!!!\n";
+        std::cin.get();
+    }
+
     nodes.resize(node_list.size(), 3);
     for (int i=0; i<node_list.size(); i++)
         nodes.row(i) << in_cloud.row(node_list[i]);

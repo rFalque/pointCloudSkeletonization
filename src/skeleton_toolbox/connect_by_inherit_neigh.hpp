@@ -24,21 +24,21 @@ inline bool connect_by_inherit_neigh(Eigen::MatrixXd & cloud,
         std::vector<int> one_ring = one_ring_list[i].get_one_ring();
         int point_node = correspondences(i);
 
-        if (point_node == 0)
+        if (point_node == -1)
             std::cout << "Warning: some points have no correspondence"<<std::endl;
         else {
             for (int j=0; j<one_ring.size(); j++)
             {
 
                 int neighbours_node = correspondences(one_ring.at(j));
-                if (neighbours_node == 0)
+                if (neighbours_node == -1)
                     std::cout << "Warning: some points have no correspondence"<<std::endl;
                 else 
                 {
                     if (point_node!=neighbours_node)
                     {
-                        A(point_node-1, neighbours_node-1) ++;
-                        A(neighbours_node-1, point_node-1) ++;
+                        A(point_node, neighbours_node) ++;
+                        A(neighbours_node, point_node) ++;
                         break;
                     }
                 }

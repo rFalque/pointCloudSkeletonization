@@ -15,11 +15,11 @@
 #include <igl/opengl/glfw/Viewer.h>
 
 #include "mesh_tools/plotMesh.hpp"
-#include "mesh_tools/nanoflannWrapper.hpp"
+//#include "mesh_tools/nanoflannWrapper.hpp"
 
-#include "utils/loadCSV.hpp"
+//#include "utils/loadCSV.hpp"
 #include "utils/options.hpp"
-#include "utils/EigenConcatenate.hpp"
+//#include "utils/EigenConcatenate.hpp"
 
 #include <Eigen/Dense>
 
@@ -37,9 +37,10 @@
 
 #include <yaml-cpp/yaml.h>
 #include <vector>
-#include <algorithm>
+//#include <algorithm>
 
-#include<Eigen/SparseCholesky>
+
+//#include<Eigen/SparseCholesky>
 
 
 
@@ -62,6 +63,7 @@
 
 int main(int argc, char* argv[])
 {
+
     options opts;
     opts.loadYAML("../config.yaml");
 
@@ -83,9 +85,49 @@ int main(int argc, char* argv[])
     std::cout << "Progress: transform contracted cloud into skeleton:\n";
     skeletonizer.skeletonization();
 
+    Eigen::VectorXi correspondences;
+    correspondences = skeletonizer.get_correspondences();
+/*
+    std::cout << "correspondences = " << correspondences.transpose() << "\n";
+
+
+    Eigen::VectorXd correspondences_copy = correspondences.cast <double> ();
+    std::cout << "correspondences_copy.maxCoeff() = " << correspondences_copy.maxCoeff() << "\n";
+    std::cout << "correspondences_copy = " << correspondences_copy.transpose() << "\n";
+    correspondences_copy/=correspondences_copy.maxCoeff();
+
+    Eigen::MatrixXd vertices_color;
+    vertices_color = Eigen::MatrixXd::Constant(V.rows(), 3, 0.9);
+
+    for (int i=0; i<V.rows(); i++)
+    {
+        vertices_color(i, 0) = correspondences_copy(i);
+        vertices_color(i, 1) = 1-correspondences_copy(i);
+        vertices_color(i, 2) = 1-correspondences_copy(i);
+    }
+    plot_mesh (V, F, vertices_color);
+*/
+
+
+
+
+Eigen::VectorXd correspondences_copy = correspondences.cast <double> ();
+double modulo_factor = 2;
+
+Eigen::MatrixXd vertices_color;
+vertices_color = Eigen::MatrixXd::Constant(V.rows(), 3, 0.9);
+
+for (int i=0; i<V.rows(); i++)
+{
+    vertices_color(i, 0) = fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
+    vertices_color(i, 1) = 1-fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
+    vertices_color(i, 2) = 1-fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
+}
+plot_mesh (V, F, vertices_color);
 
 
 /*
+
 	//plot_mesh(V,F);
     normalization(V);
 
