@@ -5,7 +5,6 @@ project(skeleton_extraction)
 add_subdirectory(external_library)
 
 set(CMAKE_BUILD_TYPE Release)
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # matplotlib support

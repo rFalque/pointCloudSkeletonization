@@ -123,6 +123,7 @@ public:
 	{
 	}
 
+
 	// initialisation of the private variables
 	bool init()
 	{
@@ -184,7 +185,8 @@ public:
 		}
 	}
 
-	bool plot() {
+	bool plot() 
+	{
 		return plot_graph(nodes_, edges_, opts_);
 	}
 
@@ -375,6 +377,12 @@ public:
 		opts_.verbose = verbose_temp;
 
 		return nodes_references;
+	}
+
+	bool transform (double scale, Eigen::Vector3d move) 
+	{
+		nodes_ /= scale;
+		nodes_ += move.transpose();
 	}
 
 	double dijkstra(int source, int target) 

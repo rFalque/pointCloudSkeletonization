@@ -29,9 +29,6 @@
  */
 
 /* TODO:
- *  - compute sample_radius from cloud
- *  - test without the normalization
- *  - update the correspondence
  *  - return the parameters
  */
 
@@ -42,7 +39,7 @@ int main(int argc, char* argv[])
     opts.loadYAML("../config.yaml");
 
     Eigen::MatrixXd V; // V: vertex of the surface
-    Eigen::MatrixXi F; // F: faces of the surface
+    Eigen::MatrixXi F; // F: faces of the surface (used for plots)
 
     std::string file_extension = opts.path_input_obj.substr(opts.path_input_obj.size() - 3);
     
@@ -51,13 +48,10 @@ int main(int argc, char* argv[])
     else if (file_extension == "ply")
         igl::readPLY(opts.path_input_obj, V, F);
 
+    plot_mesh (V, F);
+
     PointSkeletonization skeletonizer(V, F, opts);
-    std::cout << "Progress: initialization:\n";
-    skeletonizer.init();
-    std::cout << "Progress: laplacian contraction:\n";
-    skeletonizer.laplacian_contraction();
-    std::cout << "Progress: transform contracted cloud into skeleton:\n";
-    skeletonizer.skeletonization();
+    skeletonizer.skeletonize();
 
     // get correspondences out
     Eigen::VectorXi correspondences;

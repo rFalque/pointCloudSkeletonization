@@ -42,7 +42,6 @@ private:
     double normalization_scaling_;
 
     // internal functions
-	inline bool normalization();
 	inline Eigen::VectorXd one_ring_size(Eigen::MatrixXd & cloud, std::vector< OneRing > & one_ring_list, std::string distance_type);
     inline double cotan(Eigen::Vector3d v, Eigen::Vector3d w);
     inline Eigen::SparseMatrix<double> laplacian(Eigen::MatrixXd & cloud, std::vector< OneRing > & one_ring_list);
@@ -66,11 +65,18 @@ public:
 	{
 	}
 
+    bool skeletonize()
+    {
+        init();
+        normalization();
+        laplacian_contraction();
+        contracted_cloud_to_skeleton();
+        un_normalization();
+    }
+
 	// initialisation of the private variables
 	bool init()
 	{
-		normalization();
-
 		// get the nearest neighbours
 		nanoflann_wrapper knn_search(pointcloud_);
         int k_for_knn = 30;
@@ -169,17 +175,20 @@ public:
             std::iota(x.begin(), x.end(), 0);
             
             matplotlibcpp::plot(x, contraction_history);
+            matplotlibcpp::xlabel("contraction iteration");
+            matplotlibcpp::ylabel("contraction ratio");
             matplotlibcpp::title("Contraction history:");
             matplotlibcpp::show();
         }
+
 	}
 
-    bool skeletonization() 
+    bool contracted_cloud_to_skeleton() 
     {
         // turn into a Skeletonization part
-        double sample_radius;
-        getScale(pointcloud_, sample_radius);
-        sample_radius *= opts_.sample_radius;
+        double scale;
+        getScale(pointcloud_, scale);
+        double sample_radius = scale * opts_.sample_radius;
 
         Eigen::MatrixXd nodes;
         Eigen::VectorXi correspondences;
@@ -218,25 +227,39 @@ public:
         return true;
     }
 
+    inline bool normalization()
+    {
+        // centre in zero
+        nomalization_deplacement_ = (pointcloud_.colwise().minCoeff() + pointcloud_.colwise().maxCoeff()) / 2;
+        pointcloud_.rowwise() -= nomalization_deplacement_.transpose();
+
+        // make the diagonal 1.6
+        normalization_scaling_ = 1.6/(pointcloud_.colwise().maxCoeff() - pointcloud_.colwise().minCoeff()).maxCoeff();
+        pointcloud_ *= normalization_scaling_;
+
+        return true;
+    }
+
+    inline bool un_normalization()
+    {
+        pointcloud_ /= normalization_scaling_;
+        pointcloud_.rowwise() += nomalization_deplacement_.transpose();
+
+        contracted_pointcloud_ /= normalization_scaling_;
+        contracted_pointcloud_.rowwise() += nomalization_deplacement_.transpose();
+
+        skeleton_->transform(normalization_scaling_, nomalization_deplacement_);
+
+        return true;
+    }
+
     Eigen::VectorXi get_correspondences() 
     {
         return correspondences_;
-    }    
+    }
 
 };
 
-inline bool PointSkeletonization::normalization()
-{
-    // centre in zero
-    nomalization_deplacement_ = (pointcloud_.colwise().minCoeff() + pointcloud_.colwise().maxCoeff()) / 2;
-    pointcloud_.rowwise() -= nomalization_deplacement_.transpose();
-
-    // make the diagonal 1.6
-    normalization_scaling_ = 1.6/(pointcloud_.colwise().maxCoeff() - pointcloud_.colwise().minCoeff()).maxCoeff();
-    pointcloud_ *= normalization_scaling_;
-
-    return true;
-};
 
 
 // return for each point the mean distance to its neighbours
