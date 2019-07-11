@@ -4,19 +4,25 @@ io_files:
   #input_obj: "../data/bunny.off"
   #input_obj: "../data/human_mesh.ply"
 
+  # the following ones can't work on the edge decimation part as it tries to collapse all edges
+  #input_obj: "../data/9HandleTorus.off"
+  #input_obj: "../data/fertilty.off"
+  #input_obj: "../data/horse_v1987.off"
+  #input_obj: "../data/indolady5_v11125.off"
+
   output_obj: "../data/output.ply"
 
 general_params:
   verbose: true         # enable / disable the output (true / false)
-  visualization: true   # enable / disable the visualizations (true / false)
+  visualization: false   # enable / disable the visualizations (true / false)
 
 skeletonization:
   laplacian_threshold: 10000
-  iteration_time: 5
-  termination_criteria: 0.01
+  iteration_time: 10
+  termination_criteria: 0.02
   sl: 3.0
   WC: 1.0
-  sample_radius: 0.002
+  sample_radius: 0.01
   MAX_POSITION_CONSTRAINT_WEIGHT: 10000
   MAX_LAPLACIAN_CONSTRAINT_WEIGHT: 2048
 
