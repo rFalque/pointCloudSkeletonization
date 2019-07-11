@@ -1,7 +1,8 @@
 # C++ implementation of "Point Cloud Skeletons via Laplacian-Based Contraction"
 
 ## Differences with the original paper
-TBD.
+* Differente implementation of the laplacian
+* Simpler skeleton contraction (which works only for shape of [genus](https://en.wikipedia.org/wiki/Genus_(mathematics)) 0)
 
 ## Dependencies
 1. LIBIGL (for visualization and files loading)
@@ -20,5 +21,6 @@ type into the console:
 
 ![example](https://github.com/rFalque/pointCloudSkeletonization/raw/master/images/laplacian_contraction.png "example of Laplacian contraction")
 
-## Link to the original paper:
+## Link to the original papers:
 [1] [Point Cloud Skeletons via Laplacian-Based Contraction](https://gfx.uvic.ca/pubs/2010/cao_smi10/paper.pdf)
+[2] [Skeleton Extraction by Mesh Contraction](http://visgraph.cse.ust.hk/projects/skeleton/skeleton_sig08.pdf)
