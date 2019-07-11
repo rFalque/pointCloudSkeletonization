@@ -258,6 +258,11 @@ public:
         return correspondences_;
     }
 
+    Graph get_skeleton() 
+    {
+        return * skeleton_;
+    }
+
 };
 
 

@@ -19,6 +19,7 @@
 #include "utils/options.hpp"
 #include "skeleton_toolbox/pointSkeletonization.hpp"
 
+
 /*
  * List of things that could go wrong:
  *  - in the laplacian computation, line (66), division by number of neighbours needed?
@@ -53,9 +54,13 @@ int main(int argc, char* argv[])
     PointSkeletonization skeletonizer(V, F, opts);
     skeletonizer.skeletonize();
 
-    // get correspondences out
+    // get correspondences between the skeleton and the vertices
     Eigen::VectorXi correspondences;
     correspondences = skeletonizer.get_correspondences();
+
+    // get skeleton
+    Graph skeleton = skeletonizer.get_skeleton();
+    skeleton.plot();
 
     Eigen::VectorXd correspondences_copy = correspondences.cast <double> ();
     double modulo_factor = 2;
