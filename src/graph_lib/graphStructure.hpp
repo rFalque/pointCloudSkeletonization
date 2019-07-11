@@ -33,6 +33,7 @@ private:
 	std::vector< std::vector<int> > adjacency_list_;                    // contains for each nodes, its nodes neighbors
 	std::vector< std::vector<int> > adjacency_edge_list_;               // contains for each nodes, its edges neighbors
 	Eigen::VectorXd edges_length_;                                      // used only for Dijkstra
+	Eigen::MatrixXi adjacency_matrix_;
 
 	// connectivity properties
 	int is_connected_ = -1;                                             // 0 no, 1 yes, -1 undefined
@@ -96,13 +97,13 @@ public:
 		}
 
 		nodes_ = nodes;
-		Eigen::MatrixXi edges((adjacency_matrix.array() == 0).count(), 2);
+		Eigen::MatrixXi edges((adjacency_matrix.array() != 0).count(), 2);
 
 		// explore the upper triangle of the adjacency_matrix (without the diagonal)
 		int num_edges = 0;
 		for (int i=0; i<adjacency_matrix.rows(); i++)
 			for (int j=i+1; j<adjacency_matrix.cols(); j++) {
-				if (adjacency_matrix(i,j) == 1)
+				if (adjacency_matrix(i,j) != 0)
 				{
 					edges(num_edges, 0) = i;
 					edges(num_edges, 1) = j;
@@ -112,6 +113,7 @@ public:
 		edges.conservativeResize(num_edges, 2);
 
 		edges_ = edges;
+		adjacency_matrix_  = adjacency_matrix;
 		set_default_options();
 	}
 
@@ -246,6 +248,15 @@ public:
 		return true;
 	}
 
+	bool remove_edge(int edge_id)
+	{
+		// remove node
+		removeRow(edges_, edge_id);
+
+		init();
+		return true;
+	}
+
 	bool collapse_edge(int edge_id)
 	{
 		// get nodes_id:
@@ -283,17 +294,11 @@ public:
 	}
 
 	// this could be improve by using the list of cycles and collapsing the smallest edge in each cycle
-	std::vector<std::vector <int> >  make_1D_curve()
+	std::vector<std::vector <int> >  make_1D_curve(int method)
 	{
 		std::vector<std::vector <int> > nodes_references(num_nodes_);
 		for (int i=0; i<num_nodes_; i++)
 			nodes_references[i].push_back(i);
-		
-std::cout << "nodes_references: ";
-for (int i=0; i<num_nodes_; i++)
-	std::cout << nodes_references[i][0] << " ";
-std::cout << std::endl;
-
 
 		bool verbose_temp = opts_.verbose;
 		opts_.verbose = false;
@@ -320,47 +325,51 @@ std::cout << std::endl;
 					edges_to_edit.push_back(i);
 			}
 
-
-std::cout << "edges_to_edit: ";
-for (int i=0; i<edges_to_edit.size(); i++)
-	std::cout << edges_to_edit[i] << " ";
-std::cout << std::endl;
-
-std::cout << "edge[0]: " << edges_(0, 0) << "-" << edges_(0, 1) << std::endl;
-
+			std::cout << "list of edges to delete: ";
+			for (int i=0; i<edges_to_edit.size(); i++)
+				std::cout << edges_to_edit[i] << " ";
+			std::cout << std::endl;
 
 			int edge_to_edit = 0;
+			if (method == 1) {        // edge trimming, remove the edge with the lowest weight in the adjacency_matrix_
 
-			// this is used to keep track of who the nodes have been merged
-			std::vector<int> merged_nodes;
-			merged_nodes.insert( merged_nodes.end(), nodes_references[edges_(edge_to_edit, 0)].begin(), nodes_references[edges_(edge_to_edit, 0)].end() );
-			merged_nodes.insert( merged_nodes.end(), nodes_references[edges_(edge_to_edit, 1)].begin(), nodes_references[edges_(edge_to_edit, 1)].end() );
-			
-			if (edges_(edge_to_edit, 0) > edges_(edge_to_edit, 1)) {
-				nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 0));
-				nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 1));
-			} else {
-				nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 1));
-				nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 0));
+				int min_value = 99999999;
+				for (int i=0; i<edges_to_edit.size(); i++)
+				{
+					int k = edges_(edges_to_edit[i], 0);
+					int l = edges_(edges_to_edit[i], 1);
+					if (min_value>adjacency_matrix_(k,l))
+					{
+						edge_to_edit = i;
+						min_value = adjacency_matrix_(k,l);
+					}
+				}
+				std::cout << "edge_to_edit: " << edge_to_edit << "\n";
+				remove_edge(edges_to_edit[edge_to_edit]);
+
+			} else {               // merge nodes from the edge edge_to_edit
+
+				// this is used to keep track of who the nodes have been merged
+				std::vector<int> merged_nodes;
+				merged_nodes.insert( merged_nodes.end(), nodes_references[edges_(edge_to_edit, 0)].begin(), nodes_references[edges_(edge_to_edit, 0)].end() );
+				merged_nodes.insert( merged_nodes.end(), nodes_references[edges_(edge_to_edit, 1)].begin(), nodes_references[edges_(edge_to_edit, 1)].end() );
+				
+				if (edges_(edge_to_edit, 0) > edges_(edge_to_edit, 1)) {
+					nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 0));
+					nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 1));
+				} else {
+					nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 1));
+					nodes_references.erase(nodes_references.begin() + edges_(edge_to_edit, 0));
+				}
+
+				nodes_references.push_back(merged_nodes);
+
+				collapse_edge(edges_to_edit[edge_to_edit]);
 			}
-
-			nodes_references.push_back(merged_nodes);
-
-
-std::cout << "Nodes merged together:\n";
-for (int i=0; i<nodes_references.size(); i++) {
-	std::cout << "The " << i << "-th point now contains the points: ";
-	for (int j=0; j<nodes_references[i].size(); j++) {
-		std::cout << nodes_references[i][j] << " ";
-	}
-	std::cout << "\n";
-}
-
-			collapse_edge(edges_to_edit[edge_to_edit]);
-
 			// check for bridges
 			has_bridges_ = -1;
 			has_bridges();
+
 		}
 
 		opts_.verbose = verbose_temp;

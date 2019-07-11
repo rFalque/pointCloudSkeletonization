@@ -70,8 +70,6 @@ inline bool connect_by_inherit_neigh(Eigen::MatrixXd & cloud,
         }
     }
 
-    A = A.unaryExpr([](int x) { return std::min(x, 1); });
-
     return true;
 };
 

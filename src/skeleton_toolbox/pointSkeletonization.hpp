@@ -6,7 +6,6 @@
 #include <limits>
 
 #include "point_ring.hpp"
-//#include "pointSkeletonizationOptions.hpp"
 
 #include "../graph_lib/graphStructure.hpp"
 #include "../mesh_tools/nanoflannWrapper.hpp"
@@ -186,53 +185,41 @@ public:
         Eigen::VectorXi correspondences;
         farthest_sampling_by_sphere(contracted_pointcloud_, sample_radius, nodes, correspondences);
 
-
-
-
-
         Eigen::MatrixXi adjacency_matrix;
         connect_by_inherit_neigh(pointcloud_, nodes, correspondences, one_ring_list_, adjacency_matrix);
 
-
-        // Graph skeleton(nodes, adjacency_matrix);
-        std::vector<std::vector <int> > merged_nodes;
+        
         skeleton_ = new Graph(nodes, adjacency_matrix);
         skeleton_->init();
-        skeleton_->plot();
-        merged_nodes = skeleton_->make_1D_curve();
-        skeleton_->plot();
-
-        if (opts_.verbose) {
-            std::cout << "Nodes merged together:\n";
-            for (int i=0; i<merged_nodes.size(); i++) {
-                std::cout << "The " << i << "-th point now contains the points: ";
-                for (int j=0; j<merged_nodes[i].size(); j++) {
-                    std::cout << merged_nodes[i][j] << " ";
-                }
-                std::cout << "\n";
-            }
-        }
-
-        // update the point correspondence
+        
         Eigen::VectorXi updated_correspondences = Eigen::VectorXi::Constant(correspondences.rows(), -1);
+        std::vector<std::vector <int> > merged_nodes;
+        if (opts_.skeleton_editing != 0 ) {
+            merged_nodes = skeleton_->make_1D_curve(opts_.skeleton_editing);
 
-        for (int k=0; k<correspondences.rows(); k++) 
-            for (int i=0; i<merged_nodes.size(); i++)
-                for (int j=0; j<merged_nodes[i].size(); j++)
+            // update the point correspondence
+            for (int k=0; k<correspondences.rows(); k++) 
+                for (int i=0; i<merged_nodes.size(); i++)
+                    for (int j=0; j<merged_nodes[i].size(); j++)
                         if (correspondences(k) == merged_nodes[i][j])
                             updated_correspondences(k) = i;
+        } else {
+            updated_correspondences = correspondences;
+        }
         
-        std::cout << "correspondences.max" << correspondences.maxCoeff() << "\n";
+        if (opts_.visualization)
+            skeleton_->plot();
 
         if ( (updated_correspondences.array() == -1).any() )
-            std::cout << "Oh noooooo\n'";
+            std::cout << "Warning: bad point correspondence\n'";
         
         correspondences_ = updated_correspondences;
 
         return true;
     }
 
-    Eigen::VectorXi get_correspondences() {
+    Eigen::VectorXi get_correspondences() 
+    {
         return correspondences_;
     }    
 
@@ -250,6 +237,7 @@ inline bool PointSkeletonization::normalization()
 
     return true;
 };
+
 
 // return for each point the mean distance to its neighbours
 inline Eigen::VectorXd PointSkeletonization::one_ring_size(Eigen::MatrixXd & cloud, std::vector< OneRing > & one_ring_list, std::string distance_type)

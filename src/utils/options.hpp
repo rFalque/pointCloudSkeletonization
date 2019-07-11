@@ -20,6 +20,7 @@ struct options
     double sample_radius = 0.002;
     double MAX_POSITION_CONSTRAINT_WEIGHT;
     double MAX_LAPLACIAN_CONSTRAINT_WEIGHT;
+    int skeleton_editing = 0;
 
     double nodes_ratio;
     double edges_ratio;
@@ -36,6 +37,24 @@ struct options
         std::cout << "*** General parameters ***" << std::endl;
         std::cout << "visualization: " << visualization << std::endl;
         std::cout << "verbose: " << verbose << std::endl;
+        std::cout << std::endl;
+        std::cout << "*** Skeletonization parameters ***" << std::endl;
+        std::cout << "laplacian_threshold: " << laplacian_threshold << std::endl;
+        std::cout << "iteration_time: " << iteration_time << std::endl;
+        std::cout << "termination_criteria: " << termination_criteria << std::endl;
+        std::cout << "sl: " << sl << std::endl;
+        std::cout << "WC: " << WC << std::endl;
+        std::cout << "sample_radius: " << sample_radius << std::endl;
+        std::cout << "MAX_POSITION_CONSTRAINT_WEIGHT: " << MAX_POSITION_CONSTRAINT_WEIGHT << std::endl;
+        std::cout << "MAX_LAPLACIAN_CONSTRAINT_WEIGHT: " << MAX_LAPLACIAN_CONSTRAINT_WEIGHT << std::endl;
+        std::cout << "skeleton_editing: " << skeleton_editing << std::endl;
+        std::cout << std::endl;
+        std::cout << "*** Visualization parameters ***" << std::endl;
+        std::cout << "nodes_ratio: " << nodes_ratio << std::endl; 
+        std::cout << "edges_ratio: " << edges_ratio << std::endl; 
+        std::cout << "graph_res: " << graph_res << std::endl; 
+        std::cout << "nodes_color: [" << nodes_color[0] << ", " << nodes_color[1] << ", " << nodes_color[2] << "]" << std::endl; 
+        std::cout << "edges_color: [" << edges_color[0] << ", " << edges_color[1] << ", " << edges_color[2] << "]" << std::endl; 
         std::cout << std::endl;
         std::cout << std::endl;
     }
@@ -59,6 +78,7 @@ struct options
         sample_radius                   = config["skeletonization"]["sample_radius"].as<double>();
         MAX_POSITION_CONSTRAINT_WEIGHT  = config["skeletonization"]["MAX_POSITION_CONSTRAINT_WEIGHT"].as<double>();
         MAX_LAPLACIAN_CONSTRAINT_WEIGHT = config["skeletonization"]["MAX_LAPLACIAN_CONSTRAINT_WEIGHT"].as<double>();
+        skeleton_editing                = config["skeletonization"]["skeleton_editing"].as<int>();
 
         // visualization parameters
         nodes_ratio                     = config["visualization_params"]["nodes_ratio"].as<double>();
