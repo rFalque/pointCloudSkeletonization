@@ -18,13 +18,18 @@ class nanoflann_wrapper
 public:
 	nanoflann_wrapper(Eigen::MatrixXd& target)
 	{
+		if (target.rows() != 3)
+		{
+			std::cout << "Error: wrong input size\n";
+			exit(0);
+		}
+
 		// set up kdtree
 		int leaf_size=10;
 		int dimensionality=3;
 
 		this->kd_tree_index = std::make_shared< nanoflann::KDTreeEigenMatrixAdaptor< Eigen::MatrixXd> >(dimensionality, target, leaf_size);
 		this->kd_tree_index->index->buildIndex();
-
 	}
 
 	~nanoflann_wrapper(){

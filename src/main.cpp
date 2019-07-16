@@ -15,10 +15,9 @@
 #include <Eigen/Dense>
 #include <vector>
 
-#include "mesh_tools/plotMesh.hpp"
+#include "utils/plotMesh.hpp"
 #include "utils/options.hpp"
 #include "skeleton_toolbox/pointSkeletonization.hpp"
-
 
 /*
  * List of things that could go wrong:

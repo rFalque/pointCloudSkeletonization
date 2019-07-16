@@ -4,8 +4,8 @@
  * 03/07/2019
  */
 
-#ifndef EIGEN_TOOLS_HPP
-#define EIGEN_TOOLS_HPP
+#ifndef EIGEN_LIST_TO_MATRIX_HPP
+#define EIGEN_LIST_TO_MATRIX_HPP
 
 #include <iostream>
 #include <Eigen/Core>
@@ -111,14 +111,5 @@ inline bool list_to_matrix(const std::vector<T > & V,Eigen::PlainObjectBase<Deri
 
   return true;
 };
-
-namespace SparseDiagonalMatrix {
-    inline Eigen::SparseMatrix<double> Constant(int size, double value) {
-      Eigen::SparseMatrix<double> sparse_matrix(size, size);
-      for (int i=0; i<size; i++)
-        sparse_matrix.insert(i,i) = value;
-      return sparse_matrix;
-    };
-}
 
 #endif

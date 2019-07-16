@@ -1,5 +1,5 @@
 /*
-*   open .obj file and read get the graph
+*   open .obj file and read the graph
 *   in .obj files, edges are noted "l" (for line)
 *                  vertices are noted "v"
 *   
@@ -13,7 +13,7 @@
 
 #include <Eigen/Core>
 #include <vector>
-#include "../utils/EigenTools.hpp"
+#include "../utils/EigenListToMatrix.hpp"
 
 #include <string>
 #include <cstdio>

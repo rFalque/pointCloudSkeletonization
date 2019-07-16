@@ -8,28 +8,29 @@
 #include "point_ring.hpp"
 
 #include "../graph_lib/graphStructure.hpp"
-#include "../mesh_tools/nanoflannWrapper.hpp"
-#include "../mesh_tools/plotMesh.hpp"
 
 #include "farthest_sampling_by_sphere.hpp"
 #include "connect_by_inherit_neigh.hpp"
 
 #include "../utils/options.hpp"
 #include "../utils/EigenConcatenate.hpp"
-#include "../utils/EigenTools.hpp"
+#include "../utils/EigenSparse.hpp"
 #include "../utils/EigenMinMax.hpp"
+#include "../utils/EigenNanoflann.hpp"
+
 #include "../utils/matplotlibcpp.h"
+#include "../utils/plotMesh.hpp"
 
 class PointSkeletonization
 {
 private:
-    options opts_;                                                      // Store all visualization infos
+    options opts_;                                    // Store all visualization infos
 
-    Eigen::MatrixXd pointcloud_;                                        // pointcloud
-	Eigen::MatrixXd contracted_pointcloud_;                             // contracted pointcloud
-	Eigen::VectorXi correspondences_;                                    // association between each point from pointcloud_ and the nodes of the skeleton
+    Eigen::MatrixXd pointcloud_;                      // pointcloud
+	Eigen::MatrixXd contracted_pointcloud_;           // contracted pointcloud
+	Eigen::VectorXi correspondences_;                 // association between each point from pointcloud_ and the nodes of the skeleton
 	
-    Eigen::MatrixXi F_;                                                 // F: faces of the surface (for plots)
+    Eigen::MatrixXi F_;                               // F: faces of the surface (for plots)
 	
 	std::vector< OneRing > one_ring_list_;
 
