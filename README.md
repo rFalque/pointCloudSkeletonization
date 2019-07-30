@@ -1,21 +1,37 @@
 # C++ implementation of "Point Cloud Skeletons via Laplacian-Based Contraction"
 
+## todo:
+* remove libigl dependency (and replace it with [polyscope](https://github.com/nmwsharp/polyscope)) or move it into the cmake file
+
 ## Differences with the original paper
 * Differente implementation of the laplacian
 * Simpler skeleton trimming (which works only for shape of [genus](https://en.wikipedia.org/wiki/Genus_(mathematics)) 0)
 
 ## Dependencies
-1. LIBIGL (for visualization and files loading)
+1. [LIBIGL](https://github.com/libigl/libigl/) (for visualization and files loading)
+2. [libGraphCpp](https://github.com/rFalque/libGraphCpp) (automatically download from the cmake file)
+
+to build libigl:
+```console
+git clone https://github.com/libigl/libigl.git
+cd libigl
+mkdir build
+cd build
+cmake ..
+make -j3
+```
 
 ## Installation instruction
-first you need to edit the file located in ./src/cmake/FindLIBIGL.cmake to edit the location of libigl
+
+> ⚠️ **Warning**: You might have to update the path of libigl in the ./src/cmake/FindLIBIGL.cmake file
 
 type into the console:
-
-* mkdir build
-* cd build
-* cmake ../src
-* make
+```console
+mkdir build
+cd build
+cmake ../src
+make -j3
+```
 
 ## example
 
