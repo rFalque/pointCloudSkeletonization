@@ -17,6 +17,7 @@
 
 #include "utils/plotMesh.hpp"
 #include "utils/options.hpp"
+#include "utils/EigenWriteToCSV.hpp"
 #include "skeleton_toolbox/pointSkeletonization.hpp"
 
 /*
@@ -61,6 +62,8 @@ int main(int argc, char* argv[])
     // get correspondences between the skeleton and the vertices
     Eigen::VectorXi correspondences;
     correspondences = skeletonizer.get_correspondences();
+
+    EigenWriteToCSVfile(correspondences, "../data/correspondence_map.csv");
 
     // get skeleton
     Graph skeleton = skeletonizer.get_skeleton();
