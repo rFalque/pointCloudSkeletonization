@@ -8,11 +8,29 @@
 * Simpler skeleton trimming (which works only for shape of [genus](https://en.wikipedia.org/wiki/Genus_(mathematics)) 0)
 
 ## Dependencies
+
+!!! note "Note for linux users" Many linux distributions do not include gcc and the basic development tools in their default installation. On Ubuntu, you need to install the following packages:
+
+```bash
+sudo apt-get install git
+sudo apt-get install build-essential
+sudo apt-get install cmake
+sudo apt-get install libx11-dev
+sudo apt-get install mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev
+sudo apt-get install libxrandr-dev
+sudo apt-get install libxi-dev
+sudo apt-get install libxmu-dev
+sudo apt-get install libblas-dev
+sudo apt-get install libxinerama-dev
+sudo apt-get install libxcursor-dev
+```
+
+
 1. [LIBIGL](https://github.com/libigl/libigl/) (for visualization and files loading)
 2. [libGraphCpp](https://github.com/rFalque/libGraphCpp) (automatically download from the cmake file)
 
 to build libigl:
-```console
+```bash
 git clone https://github.com/libigl/libigl.git
 cd libigl
 mkdir build
@@ -26,7 +44,7 @@ make -j3
 > ⚠️ **Warning**: You might have to update the path of libigl in the ./src/cmake/FindLIBIGL.cmake file
 
 type into the console:
-```console
+```bash
 mkdir build
 cd build
 cmake ../src
