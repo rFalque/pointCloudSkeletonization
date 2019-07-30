@@ -18,7 +18,7 @@ class nanoflann_wrapper
 public:
 	nanoflann_wrapper(Eigen::MatrixXd& target)
 	{
-		if (target.rows() != 3)
+		if (target.cols() != 3)
 		{
 			std::cout << "Error: wrong input size\n";
 			exit(0);
@@ -58,6 +58,39 @@ public:
 
 		return indexes;
 	}
+
+
+	bool return_k_closest_points(Eigen::Vector3d query_point, int k, std::vector<int> & indexes, std::vector<double> & distances)
+	{
+		// Query point:
+		std::vector<double> query_pt;
+		for (int d=0; d<3; d++)
+			query_pt.push_back( query_point(d) );
+
+		indexes.clear();
+		distances.clear();
+
+		// set wtf vectors
+		std::vector<size_t> ret_indexes(k);
+		std::vector<double> out_dists_sqr(k);
+		nanoflann::KNNResultSet<double> resultSet(k);
+		resultSet.init( &ret_indexes.at(0), &out_dists_sqr.at(0) );
+
+		// knn search
+		this->kd_tree_index->index->findNeighbors(resultSet, &query_pt.at(0), nanoflann::SearchParams(k));
+
+		// pack results back into std::vector<int>
+		for (int i = 0; i < ret_indexes.size(); i++)
+		{
+			indexes.push_back( ret_indexes.at(i) );
+			distances.push_back( out_dists_sqr.at(i) );
+		}
+
+		return true;
+	}
+
+
+
 
 	std::vector< int > radius_search(Eigen::Vector3d query_point, double max_dist)
 	{
