@@ -48,7 +48,12 @@ int main(int argc, char* argv[])
     else if (file_extension == "ply")
         igl::readPLY(opts.path_input_obj, V, F);
 
-    plot_mesh (V, F);
+    if (F.rows() == 0) {
+        opts.cloud_only = true;
+        plot_cloud (V);
+    } else {
+        plot_mesh (V, F);
+    }
 
     PointSkeletonization skeletonizer(V, F, opts);
     skeletonizer.skeletonize();
@@ -72,7 +77,11 @@ int main(int argc, char* argv[])
         vertices_color(i, 1) = 1-fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
         vertices_color(i, 2) = 1-fmod(correspondences_copy(i), modulo_factor)/modulo_factor;
     }
-    plot_mesh (V, F, vertices_color);
+
+    if (opts.cloud_only)
+        plot_cloud_with_color (V, vertices_color);
+    else
+        plot_mesh (V, F, vertices_color);
 
     return 0;
 }
