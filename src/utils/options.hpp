@@ -18,9 +18,11 @@ struct options
     double sl = 3;
     double WC = 1;
     double sample_radius = 0.002;
+    double sample_ratio = 20;
     double MAX_POSITION_CONSTRAINT_WEIGHT;
     double MAX_LAPLACIAN_CONSTRAINT_WEIGHT;
     int skeleton_editing = 0;
+    bool cloud_only = false;
 
     double nodes_ratio;
     double edges_ratio;
@@ -45,6 +47,7 @@ struct options
         std::cout << "sl: " << sl << std::endl;
         std::cout << "WC: " << WC << std::endl;
         std::cout << "sample_radius: " << sample_radius << std::endl;
+        std::cout << "sample_ratio: " << sample_ratio << std::endl;
         std::cout << "MAX_POSITION_CONSTRAINT_WEIGHT: " << MAX_POSITION_CONSTRAINT_WEIGHT << std::endl;
         std::cout << "MAX_LAPLACIAN_CONSTRAINT_WEIGHT: " << MAX_LAPLACIAN_CONSTRAINT_WEIGHT << std::endl;
         std::cout << "skeleton_editing: " << skeleton_editing << std::endl;
@@ -76,6 +79,7 @@ struct options
         sl                              = config["skeletonization"]["sl"].as<double>();
         WC                              = config["skeletonization"]["WC"].as<double>();
         sample_radius                   = config["skeletonization"]["sample_radius"].as<double>();
+        sample_ratio                    = config["skeletonization"]["sample_ratio"].as<double>();
         MAX_POSITION_CONSTRAINT_WEIGHT  = config["skeletonization"]["MAX_POSITION_CONSTRAINT_WEIGHT"].as<double>();
         MAX_LAPLACIAN_CONSTRAINT_WEIGHT = config["skeletonization"]["MAX_LAPLACIAN_CONSTRAINT_WEIGHT"].as<double>();
         skeleton_editing                = config["skeletonization"]["skeleton_editing"].as<int>();
