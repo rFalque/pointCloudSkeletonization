@@ -4,10 +4,11 @@
 #include <algorithm>           // std::all_of
 #include <Eigen/Core>
 #include <limits>
+#include <math.h>
 
 #include "point_ring.hpp"
 
-#include "../graph_lib/graphStructure.hpp"
+#include "libGraphCpp/graph.hpp"
 
 #include "farthest_sampling_by_sphere.hpp"
 #include "connect_by_inherit_neigh.hpp"
@@ -125,7 +126,10 @@ public:
         double WC = opts_.WC;
 
         if (opts_.visualization)
-            plot_mesh_and_cloud (contracted_pointcloud_, F_, pointcloud_);
+            if (opts_.cloud_only)
+                plot_cloud (contracted_pointcloud_);
+            else
+                plot_mesh_and_cloud (contracted_pointcloud_, F_, pointcloud_);
         Eigen::VectorXd size = one_ring_size(pointcloud_, one_ring_list_, "min");
 
         for (int i=0; i< iteration_time; i++) {
@@ -167,7 +171,10 @@ public:
             contracted_pointcloud_ = solve_contraction(WH, WL, L, contracted_pointcloud_);
             
             if (opts_.visualization)
-                plot_mesh_and_cloud (contracted_pointcloud_, F_, pointcloud_);
+                if (opts_.cloud_only)
+                    plot_cloud (contracted_pointcloud_);
+                else
+                    plot_mesh_and_cloud (contracted_pointcloud_, F_, pointcloud_);
         }
 
         if (opts_.visualization)
@@ -189,11 +196,14 @@ public:
         // turn into a Skeletonization part
         double scale;
         getScale(pointcloud_, scale);
-        double sample_radius = scale * opts_.sample_radius;
+        //double sample_radius = scale * opts_.sample_radius;
+        int k = round(pointcloud_.rows() / opts_.sample_ratio);
 
         Eigen::MatrixXd nodes;
         Eigen::VectorXi correspondences;
-        farthest_sampling_by_sphere(contracted_pointcloud_, sample_radius, nodes, correspondences);
+
+        //farthest_sampling_by_sphere(contracted_pointcloud_, sample_radius, nodes, correspondences);
+        farthest_sampling_by_knn(contracted_pointcloud_, k, nodes, correspondences);
 
         Eigen::MatrixXi adjacency_matrix;
         connect_by_inherit_neigh(pointcloud_, nodes, correspondences, one_ring_list_, adjacency_matrix);
@@ -205,7 +215,7 @@ public:
         Eigen::VectorXi updated_correspondences = Eigen::VectorXi::Constant(correspondences.rows(), -1);
         std::vector<std::vector <int> > merged_nodes;
         if (opts_.skeleton_editing != 0 ) {
-            merged_nodes = skeleton_->make_1D_curve(opts_.skeleton_editing);
+            merged_nodes = skeleton_->make_1D_curve();
 
             // update the point correspondence
             for (int k=0; k<correspondences.rows(); k++) 
