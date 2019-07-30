@@ -9,8 +9,8 @@
 
 ## Dependencies
 
-!!! note "Note for linux users" Many linux distributions do not include gcc and the basic development tools in their default installation. On Ubuntu, you need to install the following packages:
-
+### Standard dev tools
+On Ubuntu, you need to install the following packages:
 ```bash
 sudo apt-get install git
 sudo apt-get install build-essential
@@ -25,7 +25,7 @@ sudo apt-get install libxinerama-dev
 sudo apt-get install libxcursor-dev
 ```
 
-
+### Specific dependencies:
 1. [LIBIGL](https://github.com/libigl/libigl/) (for visualization and files loading)
 2. [libGraphCpp](https://github.com/rFalque/libGraphCpp) (automatically download from the cmake file)
 
