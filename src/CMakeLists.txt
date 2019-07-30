@@ -34,7 +34,8 @@ include_directories(${PROJECT_NAME}_bin
 			        ${PROJECT_SOURCE_DIR}/external_library/
 			        ${YAML_CPP_INCLUDE_DIR}
 					${EIGEN3_INCLUDE_DIR}
-					${PYTHON_INCLUDE_DIRS})
+					${PYTHON_INCLUDE_DIRS}
+					${LIB_GRAPH_CPP_INCLUDE_DIR})
 
 target_link_libraries(${PROJECT_NAME}_bin
 			          ${YAML_CPP_LIBRARIES}
@@ -43,3 +44,4 @@ target_link_libraries(${PROJECT_NAME}_bin
 					  igl::opengl_glfw
 					  ${PYTHON_LIBRARIES})
 
+add_dependencies(${PROJECT_NAME}_bin libgraphcpp) # not linked as it is headers only
