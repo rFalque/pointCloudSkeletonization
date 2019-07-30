@@ -36,4 +36,5 @@
 # folder
 build/
 build_tests/
+trash/
 .vscode/
