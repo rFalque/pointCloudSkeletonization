@@ -25,10 +25,10 @@ skeletonization:
   sl: 3.0
   WC: 1.0
   sample_radius: 0.01
-  sample_ratio: 20
+  sample_ratio: 30
   MAX_POSITION_CONSTRAINT_WEIGHT: 10000
   MAX_LAPLACIAN_CONSTRAINT_WEIGHT: 2048
-  skeleton_editing: 1                           # 1 for edge trimming, 2 for edge merging, 0 for none
+  skeleton_editing: 0                           # 1 for edge trimming, 2 for edge merging, 0 for none
 
 visualization_params:
   nodes_ratio: 50.0

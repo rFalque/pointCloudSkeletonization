@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
     Eigen::VectorXi correspondences;
     correspondences = skeletonizer.get_correspondences();
 
-    EigenWriteToCSVfile(correspondences, "../data/correspondence_map.csv");
+    EigenWriteToCSVfile(correspondences, "../data/output/map_ids.csv");
 
     // get skeleton
     Graph skeleton = skeletonizer.get_skeleton();
@@ -85,6 +85,9 @@ int main(int argc, char* argv[])
         plot_cloud_with_color (V, vertices_color);
     else
         plot_mesh (V, F, vertices_color);
+
+    EigenWriteToCSVfile(skeleton.get_nodes(), "../data/output/graph_nodes.csv");
+    EigenWriteToCSVfile(skeleton.get_edges(), "../data/output/graph_edges.csv");
 
     return 0;
 }
