@@ -9,11 +9,12 @@
 #include <igl/readOFF.h>
 #include <igl/readPLY.h>
 #include <igl/writePLY.h>
-#include <igl/opengl/glfw/Viewer.h>
 
 #include <yaml-cpp/yaml.h>
 #include <Eigen/Dense>
 #include <vector>
+
+#include "polyscope/polyscope.h"
 
 #include "utils/plotMesh.hpp"
 #include "utils/options.hpp"
@@ -33,8 +34,10 @@
  *  - return the parameters
  */
 
+
 int main(int argc, char* argv[])
 {
+    polyscope::init();
 
     options opts;
     opts.loadYAML("../config.yaml");
@@ -66,7 +69,7 @@ int main(int argc, char* argv[])
     EigenWriteToCSVfile(correspondences, "../data/output/map_ids.csv");
 
     // get skeleton
-    Graph skeleton = skeletonizer.get_skeleton();
+    libgraphcpp::Graph skeleton = skeletonizer.get_skeleton();
     skeleton.plot();
 
     Eigen::VectorXd correspondences_copy = correspondences.cast <double> ();

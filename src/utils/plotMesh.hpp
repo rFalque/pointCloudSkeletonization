@@ -10,136 +10,77 @@
 #define PLOT_MESH_H
 
 #include <Eigen/Core>
-#include <igl/opengl/glfw/Viewer.h>
-
-#include "../skeleton_toolbox/point_ring.hpp"
 
 
-std::vector< OneRing > one_ring_list_copy;
-int vertex_iterator = 0;
+#include "polyscope/point_cloud.h"
+#include "polyscope/surface_mesh.h"
 
-
-bool key_down(igl::opengl::glfw::Viewer& viewer, unsigned char key, int modifier)
-{
-    std::cout<<"Key: "<<key<<" "<<(unsigned int)key<<std::endl;
-    if (key == '1')
-    {
-        if (vertex_iterator < one_ring_list_copy.size())
-            vertex_iterator++;
-        else
-            vertex_iterator =0;
-        
-        Eigen::MatrixXd vertices_color = Eigen::MatrixXd::Constant(one_ring_list_copy.size(), 3, 0.9);
-        std::vector< int > one_ring = one_ring_list_copy[vertex_iterator].get_one_ring();
-
-        for (int i = 0; i<one_ring.size(); i++) {
-            vertices_color.row(one_ring.at(i)) << 1, 0.1, 0.1;
-        }
-
-        viewer.data().set_colors(vertices_color);
-    }
-
-  return false;
+inline bool init_polyscope() {
+    polyscope::view::windowWidth = 1024;
+    polyscope::view::windowHeight = 1024;
 }
 
+inline bool add_mesh (const Eigen::MatrixXd& V, const Eigen::MatrixXi& F, const Eigen::MatrixXd& V_color) {
+    polyscope::registerSurfaceMesh("input mesh", V, F);
+    polyscope::getSurfaceMesh("input mesh")->addVertexColorQuantity("fColor", V_color);
+    return 0;
+};
 
-inline bool plot_one_ring (const Eigen::MatrixXd& V,
-                       const Eigen::MatrixXi& F,
-                       std::vector< OneRing > one_ring_list)
-{
-    one_ring_list_copy = one_ring_list;
-    // visualization
-    igl::opengl::glfw::Viewer viewer;
-    viewer.data().set_mesh(V, F);
-    viewer.callback_key_down = &key_down;
-    viewer.launch();
+inline bool add_mesh (const Eigen::MatrixXd& V, const Eigen::MatrixXi& F) {
+    polyscope::registerSurfaceMesh("input mesh", V, F);
+    return 0;
+};
 
+inline bool add_cloud (const Eigen::MatrixXd& V, const Eigen::MatrixXd& V_color) {
+    polyscope::registerPointCloud("point cloud", V);
+    polyscope::getPointCloud("point cloud")->addColorQuantity("fColor", V_color);
+    return 0;
+};
+
+inline bool add_cloud (const Eigen::MatrixXd& V) {
+    polyscope::registerPointCloud("point cloud", V);
     return 0;
 };
 
 
 
-inline bool add_mesh (igl::opengl::glfw::Viewer & viewer,
-                      const Eigen::MatrixXd& V,
-                      const Eigen::MatrixXi& F,
-                      const Eigen::MatrixXd& V_color)
-{
-    // visualization
-    viewer.append_mesh();
-    viewer.data().set_mesh(V, F);
-    viewer.core().background_color << 1, 1, 1, 1;
-    viewer.data().set_colors(V_color);
 
+inline bool plot_mesh (const Eigen::MatrixXd& V, const Eigen::MatrixXi& F, const Eigen::MatrixXd& V_color)
+{
+    init_polyscope();
+    add_mesh (V, F, V_color);
+    polyscope::show();
     return 0;
 };
 
-inline bool plot_mesh (const Eigen::MatrixXd& V,
-                       const Eigen::MatrixXi& F,
-                       const Eigen::MatrixXd& V_color)
-{
-    // visualization
-    igl::opengl::glfw::Viewer viewer;
-    add_mesh (viewer, V, F, V_color);
-    viewer.launch();
-
+inline bool plot_mesh (const Eigen::MatrixXd& V, const Eigen::MatrixXi& F) {
+    init_polyscope();
+    add_mesh (V, F);
+    polyscope::show();
     return 0;
 };
 
-inline bool plot_mesh (const Eigen::MatrixXd& V,
-                       const Eigen::MatrixXi& F)
-{
-    Eigen::MatrixXd vertices_color;
-    vertices_color = Eigen::MatrixXd::Constant(V.rows(), 3, 0.9);
-
-    return plot_mesh (V, F, vertices_color);
+inline bool plot_mesh_and_cloud (const Eigen::MatrixXd& mesh_V, const Eigen::MatrixXi& mesh_F, const Eigen::MatrixXd& cloud_V) {   
+    init_polyscope();
+    add_mesh (mesh_V, mesh_F);
+    add_cloud (cloud_V);
+    polyscope::show();
+    return 0;
 };
 
-inline bool plot_mesh_and_cloud (const Eigen::MatrixXd& V,
-                                 const Eigen::MatrixXi& F,
-                                 const Eigen::MatrixXd& points)
-{
-    Eigen::MatrixXd vertices_color;
-    vertices_color = Eigen::MatrixXd::Constant(V.rows(), 3, 0.9);
-    
-    // plot mesh
-    igl::opengl::glfw::Viewer viewer;
-    add_mesh (viewer, V, F, vertices_color);
-    viewer.data().add_points(points, Eigen::RowVector3d(0.2, 0, 0));
-    viewer.data().point_size = 2;
-    viewer.launch();
-
-    return true;
-};
-
-inline bool plot_cloud (const Eigen::MatrixXd& V)
-{
-    Eigen::MatrixXd vertices_color;
-    vertices_color = Eigen::MatrixXd::Constant(V.rows(), 3, 0.9);
-    
-    // plot mesh
-    igl::opengl::glfw::Viewer viewer;
-    viewer.data().add_points(V, Eigen::RowVector3d(0, 0, 0));
-    viewer.data().point_size = 2;
-    viewer.core().background_color << 1, 1, 1, 1;
-    viewer.launch();
-
-    return true;
+inline bool plot_cloud (const Eigen::MatrixXd& V) {
+    init_polyscope();
+    add_cloud (V);
+    polyscope::show();
+    return 0;
 };
 
 
-inline bool plot_cloud_with_color (const Eigen::MatrixXd& V, const Eigen::MatrixXd& color)
-{
-    Eigen::MatrixXd vertices_color;
-    vertices_color = Eigen::MatrixXd::Constant(V.rows(), 3, 0.9);
-    
-    // plot mesh
-    igl::opengl::glfw::Viewer viewer;
-    viewer.data().add_points(V, color);
-    viewer.data().point_size = 6;
-    viewer.core().background_color << 1, 1, 1, 1;
-    viewer.launch();
-
-    return true;
+inline bool plot_cloud_with_color (const Eigen::MatrixXd& V, const Eigen::MatrixXd& color) {
+    init_polyscope();
+    add_cloud (V, color);
+    polyscope::show();
+    return 0;
 };
 
 
