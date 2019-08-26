@@ -7,7 +7,8 @@ io_files:
   # the following ones can't work on the edge decimation part as it tries to collapse all edges
   #input_obj: "../data/9HandleTorus.off"
   #input_obj: "../data/fertilty.off"
-  input_obj: "../data/bunny_less_noise.ply"
+  #input_obj: "../data/bunny_less_noise.ply"
+  input_obj: "../data/bunny_keypoints.ply"
   #input_obj: "../data/bunny_full_cloud.ply"
   #input_obj: "../data/horse_v1987.off"
   #input_obj: "../data/indolady5_v11125.off"
@@ -24,11 +25,12 @@ skeletonization:
   termination_criteria: 0.01
   sl: 3.0
   WC: 1.0
-  sample_radius: 0.01
-  sample_ratio: 30
+  use_radius: false
+  sample_radius: 0.005
+  sample_ratio: 15
   MAX_POSITION_CONSTRAINT_WEIGHT: 10000
   MAX_LAPLACIAN_CONSTRAINT_WEIGHT: 2048
-  skeleton_editing: 0                           # 1 for edge trimming, 2 for edge merging, 0 for none
+  skeleton_editing: 1                           # 1 for edge trimming, 2 for edge merging, 0 for none
 
 visualization_params:
   nodes_ratio: 50.0

@@ -8,7 +8,7 @@
 
 #include "point_ring.hpp"
 
-#include "libGraphCpp/graph.hpp"
+#include "libgraphcpp/include/libGraphCpp/graph.hpp"
 
 #include "farthest_sampling_by_sphere.hpp"
 #include "connect_by_inherit_neigh.hpp"
@@ -35,7 +35,7 @@ private:
 	
 	std::vector< OneRing > one_ring_list_;
 
-	Graph* skeleton_;
+	libgraphcpp::Graph* skeleton_;
 
     bool initialized_ = false;
 
@@ -196,20 +196,26 @@ public:
         // turn into a Skeletonization part
         double scale;
         getScale(pointcloud_, scale);
-        //double sample_radius = scale * opts_.sample_radius;
-        int k = round(pointcloud_.rows() / opts_.sample_ratio);
 
         Eigen::MatrixXd nodes;
         Eigen::VectorXi correspondences;
 
-        //farthest_sampling_by_sphere(contracted_pointcloud_, sample_radius, nodes, correspondences);
-        farthest_sampling_by_knn(contracted_pointcloud_, k, nodes, correspondences);
+        if (opts_.use_radius)
+        {
+            double sample_radius = scale * opts_.sample_radius;
+            farthest_sampling_by_sphere(contracted_pointcloud_, sample_radius, nodes, correspondences);
+        }
+        else
+        {
+            int k = round(pointcloud_.rows() / opts_.sample_ratio);
+            farthest_sampling_by_knn(contracted_pointcloud_, k, nodes, correspondences);
+        }
 
         Eigen::MatrixXi adjacency_matrix;
         connect_by_inherit_neigh(pointcloud_, nodes, correspondences, one_ring_list_, adjacency_matrix);
 
         
-        skeleton_ = new Graph(nodes, adjacency_matrix);
+        skeleton_ = new libgraphcpp::Graph(nodes, adjacency_matrix);
         skeleton_->init();
         
         Eigen::VectorXi updated_correspondences = Eigen::VectorXi::Constant(correspondences.rows(), -1);
@@ -269,7 +275,7 @@ public:
         return correspondences_;
     }
 
-    Graph get_skeleton() 
+    libgraphcpp::Graph get_skeleton() 
     {
         return * skeleton_;
     }
