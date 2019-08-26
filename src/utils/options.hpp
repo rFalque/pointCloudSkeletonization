@@ -17,6 +17,7 @@ struct options
     double termination_criteria = 0.01;
     double sl = 3;
     double WC = 1;
+    bool use_radius = true;
     double sample_radius = 0.002;
     double sample_ratio = 20;
     double MAX_POSITION_CONSTRAINT_WEIGHT;
@@ -46,6 +47,7 @@ struct options
         std::cout << "termination_criteria: " << termination_criteria << std::endl;
         std::cout << "sl: " << sl << std::endl;
         std::cout << "WC: " << WC << std::endl;
+        std::cout << "use_radius: " << use_radius << std::endl;
         std::cout << "sample_radius: " << sample_radius << std::endl;
         std::cout << "sample_ratio: " << sample_ratio << std::endl;
         std::cout << "MAX_POSITION_CONSTRAINT_WEIGHT: " << MAX_POSITION_CONSTRAINT_WEIGHT << std::endl;
@@ -78,6 +80,7 @@ struct options
         termination_criteria            = config["skeletonization"]["termination_criteria"].as<double>();
         sl                              = config["skeletonization"]["sl"].as<double>();
         WC                              = config["skeletonization"]["WC"].as<double>();
+        use_radius                      = config["skeletonization"]["use_radius"].as<bool>();
         sample_radius                   = config["skeletonization"]["sample_radius"].as<double>();
         sample_ratio                    = config["skeletonization"]["sample_ratio"].as<double>();
         MAX_POSITION_CONSTRAINT_WEIGHT  = config["skeletonization"]["MAX_POSITION_CONSTRAINT_WEIGHT"].as<double>();
