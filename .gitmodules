@@ -1,4 +1,4 @@
 [submodule "src/external_library/libgraphcpp"]
 	path = external_library/libgraphcpp
 	url = https://github.com/rFalque/libGraphCpp.git
-	branch = polyscope
+	branch = master

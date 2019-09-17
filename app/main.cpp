@@ -10,7 +10,8 @@
 #include <igl/readPLY.h>
 #include <igl/writePLY.h>
 
-#include <yaml-cpp/yaml.h>
+#include "yaml-cpp/yaml.h"
+
 #include <Eigen/Dense>
 #include <vector>
 

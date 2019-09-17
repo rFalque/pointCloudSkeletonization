@@ -39,7 +39,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 #option(LIBIGL_WITH_OPENGL_GLFW_IMGUI "Use ImGui"          ON)
 #option(LIBIGL_WITH_VIEWER            "Use OpenGL viewer"  ON)
 #option(LIBIGL_USE_STATIC_LIBRARY     "Use LibIGL as static library" ON)
-find_package(LIBIGL REQUIRED QUIET)
+#find_package(LIBIGL REQUIRED QUIET)
 
 #find_package(OpenGL REQUIRED)
 
@@ -57,7 +57,7 @@ include_directories(${PROJECT_NAME}_bin
 
 target_link_libraries(${PROJECT_NAME}_bin
 			          ${YAML_CPP_LIBRARIES}
-			          igl::core
+		      igl::core
 					  yaml-cpp
 					  polyscope
 					  ${PYTHON_LIBRARIES})
