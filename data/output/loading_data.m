@@ -45,10 +45,15 @@ subplot 121;
 plot(skeleton);
 title('original graph')
 
+
+D = degree(skeleton);
+nodes_with_degree_one = find(D == 1);
+
+
 %% build the graph with neighbours
 % set depth first search traversal
 events = {'edgetonew','startnode'};
-T = dfsearch(skeleton,1,events,'Restart',true);
+T = dfsearch(skeleton,33,events,'Restart',true);
 
 % process each step:
 new_graph = graph;
@@ -158,4 +163,41 @@ for i = 1:size(T,1)
     end
 end
 
+
+%% Compute implicit surface
+clear variables;
+
+load("GP_output.mat")
+
+x = FormeshP(:,1);
+y = FormeshP(:,2);
+z = FormeshP(:,3);
+v = FormeshM;
+var = FormeshV;
+
+isize = 100;
+nxx = isize; nyy = isize; nzz = isize;
+xq = linspace(min(x), max(x), isize); 
+yq = linspace(min(y), max(y), isize);
+zq = linspace(min(z), max(z), isize);
+[Xq, Yq, Zq] = meshgrid(xq, yq, zq);
+
+Vq = griddata(x,y,z,v,Xq,Yq,Zq,'linear');
+Varq = griddata(x,y,z,var,Xq,Yq,Zq,'linear');
+
+[faces,verts,colors] = isosurface(Xq, Yq, Zq, Vq, 0, Varq);
+%[F,V,col] = MarchingCubes(Xq, Yq, Zq, Vq, 0);
+
+figure();
+
+patch('Vertices',verts,'Faces',faces,'FaceVertexCData',colors,...
+    'FaceColor','interp','EdgeColor','interp')
+view(30,-15)
+axis vis3d
+daspect([1 1 1])
+view(3); 
+axis tight
+camlight 
+lighting gouraud
+colormap parula
 

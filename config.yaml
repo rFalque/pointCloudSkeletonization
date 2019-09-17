@@ -8,7 +8,10 @@ io_files:
   #input_obj: "../data/9HandleTorus.off"
   #input_obj: "../data/fertilty.off"
   #input_obj: "../data/bunny_less_noise.ply"
-  input_obj: "../data/bunny_keypoints.ply"
+  input_obj: "../data/teddy_keypoints_poisson.ply"
+  #input_obj: "../data/bunny_keypoints.ply"
+  #input_obj: "../data/dog.ply"
+  #input_obj: "../data/lambDenseKey.ply"
   #input_obj: "../data/bunny_full_cloud.ply"
   #input_obj: "../data/horse_v1987.off"
   #input_obj: "../data/indolady5_v11125.off"
@@ -27,7 +30,7 @@ skeletonization:
   WC: 1.0
   use_radius: false
   sample_radius: 0.005
-  sample_ratio: 15
+  sample_ratio: 20
   MAX_POSITION_CONSTRAINT_WEIGHT: 10000
   MAX_LAPLACIAN_CONSTRAINT_WEIGHT: 2048
   skeleton_editing: 1                           # 1 for edge trimming, 2 for edge merging, 0 for none
