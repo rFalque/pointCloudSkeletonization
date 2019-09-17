@@ -1,7 +1,4 @@
 [submodule "src/external_library/libgraphcpp"]
-	path = src/external_library/libgraphcpp
+	path = external_library/libgraphcpp
 	url = https://github.com/rFalque/libGraphCpp.git
 	branch = polyscope
-[submodule "src/external_library/yaml-cpp"]
-	path = src/external_library/yaml-cpp
-	url = https://github.com/jbeder/yaml-cpp.git
