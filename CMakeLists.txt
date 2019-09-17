@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.1)
 
 project(skeleton_extraction)
 
-
 ### automatically download submodules
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/../.git")
@@ -18,7 +17,6 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/../.git")
         endif()
     endif()
 endif()
-
 
 
 add_subdirectory(external_library)
@@ -43,7 +41,9 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 
 #find_package(OpenGL REQUIRED)
 
-file(GLOB SRCFILES main.cpp)
+find_package(yaml-cpp REQUIRED)
+
+file(GLOB SRCFILES app/*.cpp)
 
 add_executable(${PROJECT_NAME}_bin ${SRCFILES})
 
@@ -56,8 +56,6 @@ include_directories(${PROJECT_NAME}_bin
 					${PYTHON_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME}_bin
-			          ${YAML_CPP_LIBRARIES}
-		      igl::core
 					  yaml-cpp
 					  polyscope
 					  ${PYTHON_LIBRARIES})
