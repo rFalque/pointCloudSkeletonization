@@ -1,3 +1,3 @@
 include(ExternalProject)
 
-add_subdirectory(libgraphcpp)
+add_subdirectory(libGraphCpp)

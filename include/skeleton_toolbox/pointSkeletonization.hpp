@@ -8,7 +8,7 @@
 
 #include "point_ring.hpp"
 
-#include "libgraphcpp/include/libGraphCpp/graph.hpp"
+#include "libGraphCpp/include/libGraphCpp/graph.hpp"
 
 #include "farthest_sampling_by_sphere.hpp"
 #include "connect_by_inherit_neigh.hpp"
