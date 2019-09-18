@@ -15,6 +15,8 @@
 #include "polyscope/point_cloud.h"
 #include "polyscope/surface_mesh.h"
 
+#include "polyscope/view.h"
+
 inline bool init_polyscope() {
     polyscope::view::windowWidth = 1024;
     polyscope::view::windowHeight = 1024;
@@ -49,6 +51,7 @@ inline bool plot_mesh (const Eigen::MatrixXd& V, const Eigen::MatrixXi& F, const
 {
     init_polyscope();
     add_mesh (V, F, V_color);
+    polyscope::view::resetCameraToDefault();
     polyscope::show();
     return 0;
 };
@@ -56,6 +59,7 @@ inline bool plot_mesh (const Eigen::MatrixXd& V, const Eigen::MatrixXi& F, const
 inline bool plot_mesh (const Eigen::MatrixXd& V, const Eigen::MatrixXi& F) {
     init_polyscope();
     add_mesh (V, F);
+    polyscope::view::resetCameraToDefault();
     polyscope::show();
     return 0;
 };
@@ -64,6 +68,7 @@ inline bool plot_mesh_and_cloud (const Eigen::MatrixXd& mesh_V, const Eigen::Mat
     init_polyscope();
     add_mesh (mesh_V, mesh_F);
     add_cloud (cloud_V);
+    polyscope::view::resetCameraToDefault();
     polyscope::show();
     return 0;
 };
@@ -71,6 +76,7 @@ inline bool plot_mesh_and_cloud (const Eigen::MatrixXd& mesh_V, const Eigen::Mat
 inline bool plot_cloud (const Eigen::MatrixXd& V) {
     init_polyscope();
     add_cloud (V);
+    polyscope::view::resetCameraToDefault();
     polyscope::show();
     return 0;
 };
@@ -79,6 +85,7 @@ inline bool plot_cloud (const Eigen::MatrixXd& V) {
 inline bool plot_cloud_with_color (const Eigen::MatrixXd& V, const Eigen::MatrixXd& color) {
     init_polyscope();
     add_cloud (V, color);
+    polyscope::view::resetCameraToDefault();
     polyscope::show();
     return 0;
 };

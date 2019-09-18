@@ -29,7 +29,7 @@ cmake ..
 make -j3
 ```
 
-## example
+## Run the code
 
 > :information_source: **Info**:  The input files and the skeleton trimming method can be changed through the config.yaml file.
 
@@ -42,6 +42,7 @@ To run the sample, then just type:
 
 ## todo
 * inspect the cases where the laplacian contraction produces a segmentation fault
+* reset the camera automatically
 
 ## Differences with the original paper
 * Differente implementation of the laplacian

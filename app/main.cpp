@@ -21,6 +21,7 @@
 #include "options.hpp"
 #include "EigenWriteToCSV.hpp"
 #include "skeleton_toolbox/pointSkeletonization.hpp"
+#include "eigenTools/remove_duplicates.h"
 
 /*
  * List of things that could go wrong:
@@ -35,7 +36,6 @@
  *  - return the parameters
  */
 
-
 int main(int argc, char* argv[])
 {
     polyscope::init();
@@ -44,16 +44,20 @@ int main(int argc, char* argv[])
     options opts;
     opts.loadYAML("../config.yaml");
 
-    Eigen::MatrixXd V; // V: vertex of the surface
-    Eigen::MatrixXi F; // F: faces of the surface (used for plots)
+    Eigen::MatrixXd V_tmp, V; // V: vertex of the surface
+    Eigen::MatrixXi F_tmp, F; // F: faces of the surface (used for plots)
 
     std::string file_extension = opts.path_input_obj.substr(opts.path_input_obj.size() - 3);
     
     if (file_extension == "off")
-        igl::readOFF(opts.path_input_obj, V, F);
+        igl::readOFF(opts.path_input_obj, V_tmp, F_tmp);
     else if (file_extension == "ply")
-        igl::readPLY(opts.path_input_obj, V, F);
+        igl::readPLY(opts.path_input_obj, V_tmp, F_tmp);
 
+    // remove duplicates
+    Eigen::VectorXi I;
+    igl::remove_duplicates(V_tmp, F_tmp, V, F, I);
+    
     if (F.rows() == 0) {
         opts.cloud_only = true;
         plot_cloud (V);
