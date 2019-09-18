@@ -23,17 +23,24 @@ sudo apt-get install git build-essential cmake libx11-dev mesa-common-dev libgl1
 
 ## Installation instruction
 
-> ⚠️ **Warning**: You might have to update the path of libigl in the ./src/cmake/FindLIBIGL.cmake file
-
-type into the console:
+To build, type into the console:
 ```bash
+git clone https://github.com/rFalque/pointCloudSkeletonization.git
+cd pointCloudSkeletonization
 mkdir build
 cd build
-cmake ../src
+cmake ..
 make -j3
 ```
 
 ## example
+
+> :information_source: **Info**:  The input files and the skeleton trimming method can be changed through the config.yaml file.
+
+To run the sample, then just type:
+```bash
+./skeleton_extraction_bin
+```
 
 ![skeletonization](https://github.com/rFalque/pointCloudSkeletonization/raw/master/images/skeletonization.png "example of point cloud skeletonization through Laplacian contraction")
 
