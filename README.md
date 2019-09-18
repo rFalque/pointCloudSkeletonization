@@ -1,10 +1,11 @@
 # C++ implementation of "Point Cloud Skeletons via Laplacian-Based Contraction"
 
 ## todo:
-* remove libigl dependency (and replace it with [polyscope](https://github.com/nmwsharp/polyscope)) or move it into the cmake file
+* inspect the cases where the laplacian contraction produces a segmentation fault
 
 ## Differences with the original paper
 * Differente implementation of the laplacian
+* Allows to produce a set of correspondence with similar number of points associated to it
 * Simpler skeleton trimming (which works only for shape of [genus](https://en.wikipedia.org/wiki/Genus_(mathematics)) 0)
 
 ## Dependencies
