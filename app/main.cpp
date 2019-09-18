@@ -5,10 +5,10 @@
  * 27/06/2019
  */
 
-#include <igl/readOBJ.h>
-#include <igl/readOFF.h>
-#include <igl/readPLY.h>
-#include <igl/writePLY.h>
+#include "IO/readOBJ.h"
+#include "IO/readOFF.h"
+#include "IO/readPLY.h"
+#include "IO/writePLY.h"
 
 #include "yaml-cpp/yaml.h"
 
@@ -17,9 +17,9 @@
 
 #include "polyscope/polyscope.h"
 
-#include "utils/plotMesh.hpp"
-#include "utils/options.hpp"
-#include "utils/EigenWriteToCSV.hpp"
+#include "plotMesh.hpp"
+#include "options.hpp"
+#include "EigenWriteToCSV.hpp"
 #include "skeleton_toolbox/pointSkeletonization.hpp"
 
 /*

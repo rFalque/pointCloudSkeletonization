@@ -20,6 +20,8 @@ endif()
 
 
 add_subdirectory(external_library)
+include_directories(utils)
+include_directories(include)
 
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)

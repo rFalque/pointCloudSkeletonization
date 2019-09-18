@@ -221,7 +221,7 @@ public:
         Eigen::VectorXi updated_correspondences = Eigen::VectorXi::Constant(correspondences.rows(), -1);
         std::vector<std::vector <int> > merged_nodes;
         if (opts_.skeleton_editing != 0 ) {
-            merged_nodes = skeleton_->make_1D_curve();
+            merged_nodes = skeleton_->make_tree();
 
             // update the point correspondence
             for (int k=0; k<correspondences.rows(); k++) 
