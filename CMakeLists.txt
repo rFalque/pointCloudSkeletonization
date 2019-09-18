@@ -18,7 +18,6 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/../.git")
     endif()
 endif()
 
-
 add_subdirectory(external_library)
 include_directories(utils)
 include_directories(include)
@@ -30,19 +29,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(PythonLibs 2.7)
 
 # specific version of eigen needed
-find_package(Eigen3 3.2.10 EXACT REQUIRED)
+find_package(Eigen3 3.2.10 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-# libigl
-#option(LIBIGL_WITH_OPENGL            "Use OpenGL"         ON)
-#option(LIBIGL_WITH_OPENGL_GLFW       "Use GLFW"           ON)
-#option(LIBIGL_WITH_OPENGL_GLFW_IMGUI "Use ImGui"          ON)
-#option(LIBIGL_WITH_VIEWER            "Use OpenGL viewer"  ON)
-#option(LIBIGL_USE_STATIC_LIBRARY     "Use LibIGL as static library" ON)
-#find_package(LIBIGL REQUIRED QUIET)
-
-#find_package(OpenGL REQUIRED)
-
+# yaml-cpp if not found, run sudo apt-get install libyaml-cpp-dev
 find_package(yaml-cpp REQUIRED)
 
 file(GLOB SRCFILES app/*.cpp)
@@ -61,5 +51,3 @@ target_link_libraries(${PROJECT_NAME}_bin
 					  yaml-cpp
 					  polyscope
 					  ${PYTHON_LIBRARIES})
-
-# add_dependencies(${PROJECT_NAME}_bin libGraphpp) # not linked as it is headers only

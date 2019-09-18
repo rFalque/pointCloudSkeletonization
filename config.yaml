@@ -1,14 +1,14 @@
 # input output file path data
 io_files:
   #input_obj: "../data/simplejoint_v4770.off"
-  #input_obj: "../data/bunny.off"
+  input_obj: "../data/bunny.off"
   #input_obj: "../data/human_mesh.ply"
 
   # the following ones can't work on the edge decimation part as it tries to collapse all edges
   #input_obj: "../data/9HandleTorus.off"
   #input_obj: "../data/fertilty.off"
   #input_obj: "../data/bunny_less_noise.ply"
-  input_obj: "../data/teddy_keypoints_poisson.ply"
+  #input_obj: "../data/teddy_keypoints_poisson.ply"
   #input_obj: "../data/bunny_keypoints.ply"
   #input_obj: "../data/dog.ply"
   #input_obj: "../data/lambDenseKey.ply"
@@ -20,7 +20,7 @@ io_files:
 
 general_params:
   verbose: true                                   # enable / disable the output (true / false)
-  visualization: false                             # enable / disable the visualizations (true / false)
+  visualization: true                             # enable / disable the visualizations (true / false)
 
 skeletonization:
   laplacian_threshold: 10000

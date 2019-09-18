@@ -12,32 +12,14 @@
 ### Standard dev tools
 On Ubuntu, you need to install the following packages:
 ```bash
-sudo apt-get install git
-sudo apt-get install build-essential
-sudo apt-get install cmake
-sudo apt-get install libx11-dev
-sudo apt-get install mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev
-sudo apt-get install libxrandr-dev
-sudo apt-get install libxi-dev
-sudo apt-get install libxmu-dev
-sudo apt-get install libblas-dev
-sudo apt-get install libxinerama-dev
-sudo apt-get install libxcursor-dev
+sudo apt-get update
+sudo apt-get install git build-essential cmake libx11-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libxrandr-dev libxi-dev libxmu-dev libblas-dev libxinerama-dev libxcursor-dev libeigen3-dev libyaml-cpp-dev
 ```
 
 ### Specific dependencies:
-1. [LIBIGL](https://github.com/libigl/libigl/) (for visualization and files loading)
+1. [Eigen](https://eigen.tuxfamily.org/) (for visualization and files loading)
 2. [libGraphCpp](https://github.com/rFalque/libGraphCpp) (automatically download from the cmake file)
-
-to build libigl:
-```bash
-git clone https://github.com/libigl/libigl.git
-cd libigl
-mkdir build
-cd build
-cmake ..
-make -j3
-```
+3. [polyscope](http://polyscope.run/) (downloaded as part of libGraphCpp)
 
 ## Installation instruction
 
