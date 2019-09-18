@@ -39,6 +39,7 @@
 int main(int argc, char* argv[])
 {
     polyscope::init();
+    ::polyscope_is_initialized = true;
 
     options opts;
     opts.loadYAML("../config.yaml");
