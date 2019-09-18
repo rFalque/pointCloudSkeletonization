@@ -1,7 +1,7 @@
 # C++ implementation of "Point Cloud Skeletons via Laplacian-Based Contraction"
 
 ## What is in this repository?
-This repository contains the implementation of the point cloud skeletonization  based on the Laplacian-based contraction [1](#references). In short, a point cloud is used as an input, we then build a Laplacian operator based on the concept of a one-ring neighbourhood. This operator is then used for contracting the point cloud. A skeleton is then built using farthest distance sampling with either a k-nn distance or a radius search.
+This repository contains the implementation of the point cloud skeletonization  based on the Laplacian-based contraction [[1]](#references). In short, a point cloud is used as an input, we then build a Laplacian operator based on the concept of a one-ring neighbourhood. This operator is then used for contracting the point cloud. A skeleton is then built using farthest distance sampling with either a k-nn distance or a radius search.
 
 ## Dependencies
 
@@ -48,7 +48,8 @@ To run the sample, then just type:
 * Allows to produce a set of correspondence with similar number of points associated to it
 * Simpler skeleton trimming (which works only for shape of [genus](https://en.wikipedia.org/wiki/Genus_(mathematics)) 0)
 
-## Link to the original papers: (#references)
+## Link to the original papers: 
+(#references)
 1. [Point Cloud Skeletons via Laplacian-Based Contraction](https://gfx.uvic.ca/pubs/2010/cao_smi10/paper.pdf)
 2. [Skeleton Extraction by Mesh Contraction](http://visgraph.cse.ust.hk/projects/skeleton/skeleton_sig08.pdf)
 
