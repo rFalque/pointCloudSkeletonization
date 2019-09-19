@@ -10,7 +10,8 @@
 #include <Eigen/Core>
 #include <limits> 
 #include <iostream>
-#include "../utils/EigenNanoflann.hpp"
+
+#include "EigenTools/nanoflannWrapper.hpp"
 
 int argMax(const Eigen::VectorXd & data)
 {

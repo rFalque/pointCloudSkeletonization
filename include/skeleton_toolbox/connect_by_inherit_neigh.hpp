@@ -10,7 +10,9 @@
 #include <Eigen/Core>
 #include <limits> 
 #include <iostream>
-#include "../utils/EigenNanoflann.hpp"
+
+#include "EigenTools/nanoflannWrapper.hpp"
+
 #include "point_ring.hpp"
 
 inline bool connect_by_inherit_neigh(Eigen::MatrixXd & cloud, 

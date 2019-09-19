@@ -9,20 +9,21 @@ struct options
     /* data */
     std::string path_input_obj;
 
-    bool   visualization;
-    bool   verbose;
+    bool   visualization = false;
+    bool   verbose = false;
 
-    double laplacian_threshold;
-    int iteration_time = 5;
-    double termination_criteria = 0.01;
-    double sl = 3;
-    double WC = 1;
+    int skeleton_editing = 0;
     bool use_radius = true;
     double sample_radius = 0.002;
     double sample_ratio = 20;
-    double MAX_POSITION_CONSTRAINT_WEIGHT;
-    double MAX_LAPLACIAN_CONSTRAINT_WEIGHT;
-    int skeleton_editing = 0;
+    int iteration_time = 10;
+    double termination_criteria = 0.01;
+    int k_for_knn = 15;
+    double sl = 3;
+    double WC = 1;
+    double laplacian_threshold = 10000;
+    double MAX_POSITION_CONSTRAINT_WEIGHT = 10000;
+    double MAX_LAPLACIAN_CONSTRAINT_WEIGHT = 2048;
     bool cloud_only = false;
 
     double nodes_ratio;
@@ -42,17 +43,18 @@ struct options
         std::cout << "verbose: " << verbose << std::endl;
         std::cout << std::endl;
         std::cout << "*** Skeletonization parameters ***" << std::endl;
-        std::cout << "laplacian_threshold: " << laplacian_threshold << std::endl;
+        std::cout << "skeleton_editing: " << skeleton_editing << std::endl;
+        std::cout << "use_radius: " << use_radius << std::endl;
+        std::cout << "sample_radius: " << sample_radius << std::endl;
+        std::cout << "sample_ratio: " << sample_ratio << std::endl;
         std::cout << "iteration_time: " << iteration_time << std::endl;
         std::cout << "termination_criteria: " << termination_criteria << std::endl;
         std::cout << "sl: " << sl << std::endl;
         std::cout << "WC: " << WC << std::endl;
-        std::cout << "use_radius: " << use_radius << std::endl;
-        std::cout << "sample_radius: " << sample_radius << std::endl;
-        std::cout << "sample_ratio: " << sample_ratio << std::endl;
+        std::cout << "k_for_knn: " << k_for_knn << std::endl;
+        std::cout << "laplacian_threshold: " << laplacian_threshold << std::endl;
         std::cout << "MAX_POSITION_CONSTRAINT_WEIGHT: " << MAX_POSITION_CONSTRAINT_WEIGHT << std::endl;
         std::cout << "MAX_LAPLACIAN_CONSTRAINT_WEIGHT: " << MAX_LAPLACIAN_CONSTRAINT_WEIGHT << std::endl;
-        std::cout << "skeleton_editing: " << skeleton_editing << std::endl;
         std::cout << std::endl;
         std::cout << "*** Visualization parameters ***" << std::endl;
         std::cout << "nodes_ratio: " << nodes_ratio << std::endl; 
@@ -86,6 +88,7 @@ struct options
         MAX_POSITION_CONSTRAINT_WEIGHT  = config["skeletonization"]["MAX_POSITION_CONSTRAINT_WEIGHT"].as<double>();
         MAX_LAPLACIAN_CONSTRAINT_WEIGHT = config["skeletonization"]["MAX_LAPLACIAN_CONSTRAINT_WEIGHT"].as<double>();
         skeleton_editing                = config["skeletonization"]["skeleton_editing"].as<int>();
+        k_for_knn                       = config["skeletonization"]["k_for_knn"].as<int>();
 
         // visualization parameters
         nodes_ratio                     = config["visualization_params"]["nodes_ratio"].as<double>();

@@ -19,9 +19,12 @@
 
 #include "plotMesh.hpp"
 #include "options.hpp"
-#include "EigenWriteToCSV.hpp"
+
+#include "EigenTools/writeToCSV.hpp"
+#include "EigenTools/remove_duplicates.h"
+
+
 #include "skeleton_toolbox/pointSkeletonization.hpp"
-#include "eigenTools/remove_duplicates.h"
 
 /*
  * List of things that could go wrong:

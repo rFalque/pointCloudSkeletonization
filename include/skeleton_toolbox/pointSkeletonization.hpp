@@ -13,14 +13,14 @@
 #include "farthest_sampling_by_sphere.hpp"
 #include "connect_by_inherit_neigh.hpp"
 
-#include "../utils/options.hpp"
-#include "../utils/EigenConcatenate.hpp"
-#include "../utils/EigenSparse.hpp"
-#include "../utils/EigenMinMax.hpp"
-#include "../utils/EigenNanoflann.hpp"
+#include "EigenTools/concatenate.hpp"
+#include "EigenTools/sparse.hpp"
+#include "EigenTools/minMax.hpp"
+#include "EigenTools/nanoflannWrapper.hpp"
 
-#include "../utils/matplotlibcpp.h"
-#include "../utils/plotMesh.hpp"
+#include "options.hpp"
+#include "matplotlibcpp.h"
+#include "plotMesh.hpp"
 
 class PointSkeletonization
 {
@@ -270,6 +270,7 @@ public:
         return true;
     }
 
+    // set up assessors
     Eigen::VectorXi get_correspondences() 
     {
         return correspondences_;
