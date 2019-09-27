@@ -66,7 +66,7 @@ inline bool igl::readOFF(
   bool still_comments = true;
   while(still_comments)
   {
-    fgets(line,1000,off_file);
+    char* temp = fgets(line,1000,off_file);
     still_comments = (line[0] == '#' || line[0] == '\n');
   }
   sscanf(line,"%d %d %d",&number_of_vertices,&number_of_faces,&number_of_edges);
@@ -80,7 +80,7 @@ inline bool igl::readOFF(
   // Read vertices
   for(int i = 0;i<number_of_vertices;)
   {
-    fgets(line, 1000, off_file);
+    char* temp = fgets(line, 1000, off_file);
     double x,y,z,nx,ny,nz;
     if(sscanf(line, "%lg %lg %lg %lg %lg %lg",&x,&y,&z,&nx,&ny,&nz)>= 3)
     {
@@ -113,7 +113,7 @@ inline bool igl::readOFF(
         fscanf(off_file,"%[#]",&tic_tac_toe)==1)
     {
       char comment[1000];
-      fscanf(off_file,"%[^\n]",comment);
+      int temp = fscanf(off_file,"%[^\n]",comment);
     }else
     {
       printf("Error: bad line (%d)\n",i);
@@ -137,9 +137,9 @@ inline bool igl::readOFF(
         int index;
         if(j<valence-1)
         {
-          fscanf(off_file,"%d",&index);
+          int temp = fscanf(off_file,"%d",&index);
         }else{
-          fscanf(off_file,"%d%*[^\n]",&index);
+          int temp = fscanf(off_file,"%d%*[^\n]",&index);
         }
 
         face[j] = index;
@@ -150,7 +150,7 @@ inline bool igl::readOFF(
              fscanf(off_file,"%[#]",&tic_tac_toe)==1)
     {
       char comment[1000];
-      fscanf(off_file,"%[^\n]",comment);
+      int temp = fscanf(off_file,"%[^\n]",comment);
     }else
     {
       printf("Error: bad line\n");
@@ -202,7 +202,8 @@ inline bool igl::readOFF(
   const std::string str,
   Eigen::PlainObjectBase<DerivedV>& V,
   Eigen::PlainObjectBase<DerivedF>& F,
-  Eigen::PlainObjectBase<DerivedV>& N)
+  Eigen::PlainObjectBase<DerivedV>& N,
+  Eigen::PlainObjectBase<DerivedV>& C)
 {
   std::vector<std::vector<double> > vV;
   std::vector<std::vector<double> > vN;
@@ -241,7 +242,7 @@ inline bool igl::readOFF(
   //Warning: RGB colors will be returned in the N matrix
   if (vC.size())
   {
-    bool C_rect = igl::list_to_matrix(vC,N);
+    bool C_rect = igl::list_to_matrix(vC,C);
     if(!C_rect)
     {
       // igl::list_to_matrix(vC,N) already printed error message to std err

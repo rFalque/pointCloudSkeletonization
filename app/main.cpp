@@ -52,14 +52,18 @@ int main(int argc, char* argv[])
 
     std::string file_extension = opts.path_input_obj.substr(opts.path_input_obj.size() - 3);
     
+    std::cout << "Progress: load file ... ";
     if (file_extension == "off")
         igl::readOFF(opts.path_input_obj, V_tmp, F_tmp);
     else if (file_extension == "ply")
         igl::readPLY(opts.path_input_obj, V_tmp, F_tmp);
+    std::cout << " done\n";
 
     // remove duplicates
+    std::cout << "Progress: remove duplicates ... ";
     Eigen::VectorXi I;
     igl::remove_duplicates(V_tmp, F_tmp, V, F, I);
+    std::cout << "done\n";
     
     if (F.rows() == 0) {
         opts.cloud_only = true;
@@ -79,6 +83,7 @@ int main(int argc, char* argv[])
 
     // get skeleton
     libgraphcpp::Graph skeleton = skeletonizer.get_skeleton();
+    skeleton.save("../data/output/skeleton_graph.obj");
     skeleton.plot();
 
     Eigen::VectorXd correspondences_copy = correspondences.cast <double> ();
@@ -94,7 +99,7 @@ int main(int argc, char* argv[])
     }
 
     if (opts.cloud_only)
-        plot_cloud_with_color (V, vertices_color);
+        plot_cloud (V, vertices_color);
     else
         plot_mesh (V, F, vertices_color);
 

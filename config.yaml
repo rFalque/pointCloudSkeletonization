@@ -3,10 +3,11 @@ io_files:
   #input_obj: "../data/simplejoint_v4770.off"
   #input_obj: "../data/bunny.off"
   #input_obj: "../data/human_mesh.ply"
-  input_obj: "../data/target_8.ply"
+  #input_obj: "../data/target_8.ply"
 
   # the following ones can't work on the edge decimation part as it tries to collapse all edges
   #input_obj: "../data/9HandleTorus.off"
+  input_obj: "../data/crab_small.off"
   #input_obj: "../data/fertilty.off"
   #input_obj: "../data/bunny_less_noise.ply"
   #input_obj: "../data/teddy_keypoints_poisson.ply"

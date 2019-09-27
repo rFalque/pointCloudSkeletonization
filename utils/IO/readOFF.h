@@ -73,7 +73,8 @@ namespace igl
     const std::string str,
     Eigen::PlainObjectBase<DerivedV>& V,
     Eigen::PlainObjectBase<DerivedF>& F,
-    Eigen::PlainObjectBase<DerivedV>& N);
+    Eigen::PlainObjectBase<DerivedV>& N,
+    Eigen::PlainObjectBase<DerivedV>& C);
 #endif
 
 }
