@@ -21,6 +21,8 @@
 #include "options.hpp"
 #include "matplotlibcpp.h"
 #include "plotMesh.hpp"
+#include "plotCloud.hpp"
+#include "plotHybrid.hpp"
 
 class PointSkeletonization
 {
