@@ -39,19 +39,39 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 # yaml-cpp if not found, run sudo apt-get install libyaml-cpp-dev
 find_package(yaml-cpp REQUIRED)
 
-file(GLOB SRCFILES app/*.cpp)
 
-add_executable(${PROJECT_NAME}_bin ${SRCFILES})
 
-set_target_properties(${PROJECT_NAME}_bin PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+file(GLOB_RECURSE my_c_list RELATIVE ${CMAKE_SOURCE_DIR} "app/*")
 
-include_directories(${PROJECT_NAME}_bin
-			        ${PROJECT_SOURCE_DIR}/external_library/
-			        ${YAML_CPP_INCLUDE_DIR}
-					${EIGEN3_INCLUDE_DIR}
-					${PYTHON_INCLUDE_DIRS})
+foreach(file_path ${my_c_list})
+    string( REPLACE ".cpp" "" new_name ${file_path} )
+    get_filename_component(filename ${new_name} NAME)
+    add_executable( ${filename} ${file_path} )
+    set_target_properties(${filename} PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+    include_directories(${filename}
+                        ${PROJECT_SOURCE_DIR}/external_library/
+                        ${YAML_CPP_INCLUDE_DIR}
+                        ${EIGEN3_INCLUDE_DIR}
+                        ${PYTHON_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME}_bin
-					  yaml-cpp
-					  polyscope
-					  ${PYTHON_LIBRARIES})
+    target_link_libraries(${filename}
+                        yaml-cpp
+                        polyscope
+                        ${PYTHON_LIBRARIES})
+
+endforeach()
+
+#file(GLOB SRCFILES app/*.cpp)
+#add_executable(${PROJECT_NAME}_bin ${SRCFILES})
+#set_target_properties(${PROJECT_NAME}_bin PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+
+#include_directories(${PROJECT_NAME}_bin
+#			        ${PROJECT_SOURCE_DIR}/external_library/
+#			        ${YAML_CPP_INCLUDE_DIR}
+#					${EIGEN3_INCLUDE_DIR}
+#					${PYTHON_INCLUDE_DIRS})
+
+#target_link_libraries(${PROJECT_NAME}_bin
+#					  yaml-cpp
+#					  polyscope
+#					  ${PYTHON_LIBRARIES})
