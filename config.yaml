@@ -7,8 +7,10 @@ io_files:
 
   # the following ones can't work on the edge decimation part as it tries to collapse all edges
   #input_obj: "../data/9HandleTorus.off"
-  input_obj: "../data/crab_small.off"
-  #input_obj: "../data/fertilty.off"
+  #input_obj: "../data/crab_small.off"
+  input_point_cloud: "../data/crab_small.off"
+  input_mesh: "../data/fertilty.off"
+  input_obj: "../data/fertilty.off"
   #input_obj: "../data/bunny_less_noise.ply"
   #input_obj: "../data/teddy_keypoints_poisson.ply"
   #input_obj: "../data/bunny_keypoints.ply"
@@ -25,6 +27,7 @@ io_files:
 general_params:
   verbose: true                                   # enable / disable the output (true / false)
   visualization: true                             # enable / disable the visualizations (true / false)
+  visualization_with_matplotlibcpp: false         # enable / disable additional visualizations (true / false)
 
 skeletonization:
   # user parameters

@@ -35,7 +35,7 @@ make -j3
 
 To run the sample, then just type:
 ```bash
-./skeleton_extraction_bin
+./pointcloud_skeleton_extraction
 ```
 
 ![skeletonization](https://github.com/rFalque/pointCloudSkeletonization/raw/master/images/skeletonization.png "example of point cloud skeletonization through Laplacian contraction")

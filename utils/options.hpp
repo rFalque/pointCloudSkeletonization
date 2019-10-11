@@ -9,8 +9,9 @@ struct options
     /* data */
     std::string path_input_obj;
 
-    bool   visualization = false;
     bool   verbose = false;
+    bool   visualization = false;
+    bool   visualization_with_matplotlibcpp = false;
 
     int skeleton_editing = 0;
     bool use_radius = true;
@@ -39,8 +40,9 @@ struct options
         std::cout <<  "path_input_obj: " << path_input_obj << std::endl;
         std::cout << std::endl;
         std::cout << "*** General parameters ***" << std::endl;
-        std::cout << "visualization: " << visualization << std::endl;
         std::cout << "verbose: " << verbose << std::endl;
+        std::cout << "visualization: " << visualization << std::endl;
+        std::cout << "visualization_with_matplotlibcpp: " << visualization_with_matplotlibcpp << std::endl;
         std::cout << std::endl;
         std::cout << "*** Skeletonization parameters ***" << std::endl;
         std::cout << "skeleton_editing: " << skeleton_editing << std::endl;
@@ -70,32 +72,33 @@ struct options
         YAML::Node config = YAML::LoadFile(config_file);
         
         // IO
-        path_input_obj                  = config["io_files"]["input_obj"].as<std::string>();
+        path_input_obj                   = config["io_files"]["input_obj"].as<std::string>();
 
         // general options
-        visualization                   = config["general_params"]["visualization"].as<bool>();
-        verbose                         = config["general_params"]["verbose"].as<bool>();
+        verbose                          = config["general_params"]["verbose"].as<bool>();
+        visualization                    = config["general_params"]["visualization"].as<bool>();
+        visualization_with_matplotlibcpp = config["general_params"]["visualization_with_matplotlibcpp"].as<bool>();
 
         // skeletonization
-        laplacian_threshold             = config["skeletonization"]["laplacian_threshold"].as<double>();
-        iteration_time                  = config["skeletonization"]["iteration_time"].as<int>();
-        termination_criteria            = config["skeletonization"]["termination_criteria"].as<double>();
-        sl                              = config["skeletonization"]["sl"].as<double>();
-        WC                              = config["skeletonization"]["WC"].as<double>();
-        use_radius                      = config["skeletonization"]["use_radius"].as<bool>();
-        sample_radius                   = config["skeletonization"]["sample_radius"].as<double>();
-        sample_ratio                    = config["skeletonization"]["sample_ratio"].as<double>();
-        MAX_POSITION_CONSTRAINT_WEIGHT  = config["skeletonization"]["MAX_POSITION_CONSTRAINT_WEIGHT"].as<double>();
-        MAX_LAPLACIAN_CONSTRAINT_WEIGHT = config["skeletonization"]["MAX_LAPLACIAN_CONSTRAINT_WEIGHT"].as<double>();
-        skeleton_editing                = config["skeletonization"]["skeleton_editing"].as<int>();
-        k_for_knn                       = config["skeletonization"]["k_for_knn"].as<int>();
+        laplacian_threshold              = config["skeletonization"]["laplacian_threshold"].as<double>();
+        iteration_time                   = config["skeletonization"]["iteration_time"].as<int>();
+        termination_criteria             = config["skeletonization"]["termination_criteria"].as<double>();
+        sl                               = config["skeletonization"]["sl"].as<double>();
+        WC                               = config["skeletonization"]["WC"].as<double>();
+        use_radius                       = config["skeletonization"]["use_radius"].as<bool>();
+        sample_radius                    = config["skeletonization"]["sample_radius"].as<double>();
+        sample_ratio                     = config["skeletonization"]["sample_ratio"].as<double>();
+        MAX_POSITION_CONSTRAINT_WEIGHT   = config["skeletonization"]["MAX_POSITION_CONSTRAINT_WEIGHT"].as<double>();
+        MAX_LAPLACIAN_CONSTRAINT_WEIGHT  = config["skeletonization"]["MAX_LAPLACIAN_CONSTRAINT_WEIGHT"].as<double>();
+        skeleton_editing                 = config["skeletonization"]["skeleton_editing"].as<int>();
+        k_for_knn                        = config["skeletonization"]["k_for_knn"].as<int>();
 
         // visualization parameters
-        nodes_ratio                     = config["visualization_params"]["nodes_ratio"].as<double>();
-        edges_ratio                     = config["visualization_params"]["edges_ratio"].as<double>();
-        graph_res                       = config["visualization_params"]["graph_res"].as<double>();
-        nodes_color                     = config["visualization_params"]["nodes_color"].as<std::vector<double>>();
-        edges_color                     = config["visualization_params"]["edges_color"].as<std::vector<double>>();
+        nodes_ratio                      = config["visualization_params"]["nodes_ratio"].as<double>();
+        edges_ratio                      = config["visualization_params"]["edges_ratio"].as<double>();
+        graph_res                        = config["visualization_params"]["graph_res"].as<double>();
+        nodes_color                      = config["visualization_params"]["nodes_color"].as<std::vector<double>>();
+        edges_color                      = config["visualization_params"]["edges_color"].as<std::vector<double>>();
 
         if (verbose)
             print();
