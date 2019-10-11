@@ -75,4 +75,5 @@ inline bool connect_by_inherit_neigh(Eigen::MatrixXd & cloud,
     return true;
 };
 
+
 #endif
