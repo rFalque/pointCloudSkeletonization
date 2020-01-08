@@ -18,11 +18,12 @@ sudo apt-get install git build-essential cmake libx11-dev mesa-common-dev libgl1
 The dependencies are specified for information only, however they should all be installed automatically.
 1. [Eigen](https://eigen.tuxfamily.org/) (downloaded through sudo apt-get install)
 2. [yaml-cpp](https://github.com/jbeder/yaml-cpp) (downloaded through sudo apt-get install)
-2. [libGraphCpp](https://github.com/rFalque/libGraphCpp) (automatically download from the cmake file)
-3. [polyscope](http://polyscope.run/) (downloaded as part of libGraphCpp)
+3. [libGraphCpp](https://github.com/rFalque/libGraphCpp) (automatically download from the cmake file)
+4. [polyscope](http://polyscope.run/) (downloaded as part of libGraphCpp)
 
 Optional dependencies:
-4. [matplotlib-cpp](https://github.com/lava/matplotlib-cpp)
+
+5. [matplotlib-cpp](https://github.com/lava/matplotlib-cpp)
 
 ## Installation instruction
 To build, type into the console:
@@ -49,7 +50,7 @@ To run the sample, then just type:
 ## todo
 * add parallelization
 
-## Differences with the original paper [1]
+## Differences with the original paper [[1]](#link-to-the-original-papers)
 * Different implementation of the laplacian
 * The nodes are generated using the farthest sampling algorithm (using either a sphere or k-NN to find neighbours). The k-NN sampling allows to have nodes generated with respect to the points density
 * Several skeleton trimming is available depending of the required skeleton type
