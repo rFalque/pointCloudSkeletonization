@@ -1,7 +1,9 @@
 # C++ implementation of "Point Cloud Skeletons via Laplacian-Based Contraction"
 
 ## What is in this repository?
-This repository contains the implementation of the point cloud skeletonization  based on the Laplacian-based contraction [[1]](#link-to-the-original-papers). In short, a point cloud is used as an input, we then build a Laplacian operator based on the concept of a one-ring neighbourhood. This operator is then used for contracting the point cloud. A skeleton is then built using farthest distance sampling with either a k-nn distance or a radius search.
+This repository contains the C++ implementation of the point cloud skeletonization  based on the Laplacian-based contraction [[1]](#link-to-the-original-papers). In short, a point cloud is used as an input, a Laplacian operator is then built based on the concept of a one-ring neighbourhood. This operator is then used for contracting the point cloud. A skeleton is then built using farthest distance sampling with either a k-NN or a radius search.
+
+Additionally, mesh skeletonization using the same method with the Laplacian defined on the mesh is also provided.
 
 ## Dependencies
 
@@ -9,16 +11,20 @@ This repository contains the implementation of the point cloud skeletonization  
 On Ubuntu, you need to install the following packages:
 ```bash
 sudo apt-get update
-sudo apt-get install git build-essential cmake libx11-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libxrandr-dev libxi-dev libxmu-dev libblas-dev libxinerama-dev libxcursor-dev libeigen3-dev libyaml-cpp-dev
+sudo apt-get install git build-essential cmake libx11-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libxrandr-dev libxi-dev libxmu-dev libblas-dev libxinerama-dev libxcursor-dev libeigen3-dev libyaml-cpp-dev python-matplotlib python-numpy python2.7-dev
 ```
 
 ### Specific dependencies
+The dependencies are specified for information only, however they should all be installed automatically.
 1. [Eigen](https://eigen.tuxfamily.org/) (downloaded through sudo apt-get install)
+2. [yaml-cpp](https://github.com/jbeder/yaml-cpp) (downloaded through sudo apt-get install)
 2. [libGraphCpp](https://github.com/rFalque/libGraphCpp) (automatically download from the cmake file)
 3. [polyscope](http://polyscope.run/) (downloaded as part of libGraphCpp)
 
-## Installation instruction
+Optional dependencies:
+4. [matplotlib-cpp](https://github.com/lava/matplotlib-cpp)
 
+## Installation instruction
 To build, type into the console:
 ```bash
 git clone https://github.com/rFalque/pointCloudSkeletonization.git
@@ -41,13 +47,12 @@ To run the sample, then just type:
 ![skeletonization](https://github.com/rFalque/pointCloudSkeletonization/raw/master/images/skeletonization.png "example of point cloud skeletonization through Laplacian contraction")
 
 ## todo
-* inspect the cases where the laplacian contraction produces a segmentation fault
-* reset the camera automatically
+* add parallelization
 
-## Differences with the original paper
-* Differente implementation of the laplacian
-* Allows to produce a set of correspondence with similar number of points associated to it
-* Simpler skeleton trimming (which works only for shape of [genus](https://en.wikipedia.org/wiki/Genus_(mathematics)) 0)
+## Differences with the original paper [1]
+* Different implementation of the laplacian
+* The nodes are generated using the farthest sampling algorithm (using either a sphere or k-NN to find neighbours). The k-NN sampling allows to have nodes generated with respect to the points density
+* Several skeleton trimming is available depending of the required skeleton type
 
 ## Link to the original papers
 1. [Point Cloud Skeletons via Laplacian-Based Contraction](https://gfx.uvic.ca/pubs/2010/cao_smi10/paper.pdf)
