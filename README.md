@@ -48,11 +48,7 @@ To run the sample, then just type:
 ![skeletonization](https://github.com/rFalque/pointCloudSkeletonization/raw/master/images/skeletonization.png "example of point cloud skeletonization through Laplacian contraction")
 
 ## todo
-<<<<<<< HEAD
-* reset the camera automatically
-=======
 * add parallelization
->>>>>>> 774bdbcc478479567b7b8969d3fe8a7ffca49cdf
 
 ## Differences with the original paper [[1]](#link-to-the-original-papers)
 * Different implementation of the laplacian
