@@ -41,7 +41,6 @@ To run the sample, then just type:
 ![skeletonization](https://github.com/rFalque/pointCloudSkeletonization/raw/master/images/skeletonization.png "example of point cloud skeletonization through Laplacian contraction")
 
 ## todo
-* inspect the cases where the laplacian contraction produces a segmentation fault
 * reset the camera automatically
 
 ## Differences with the original paper

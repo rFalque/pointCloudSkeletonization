@@ -10,7 +10,7 @@
 
 #include "libGraphCpp/include/libGraphCpp/graph.hpp"
 
-#include "farthest_sampling_by_sphere.hpp"
+#include "farthest_sampling.hpp"
 #include "connect_by_inherit_neigh.hpp"
 
 #include "EigenTools/concatenate.hpp"
@@ -185,6 +185,7 @@ public:
                     plot_cloud (contracted_pointcloud_);
                 else
                     plot_mesh_and_cloud (contracted_pointcloud_, F_, pointcloud_);
+            
         }
 
         if (opts_.visualization_with_matplotlibcpp)

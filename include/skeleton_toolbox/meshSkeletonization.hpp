@@ -8,7 +8,7 @@
 
 #include "libGraphCpp/include/libGraphCpp/graph.hpp"
 
-#include "farthest_sampling_by_sphere.hpp"
+#include "farthest_sampling.hpp"
 
 #include "EigenTools/concatenate.hpp"
 #include "EigenTools/sparse.hpp"
