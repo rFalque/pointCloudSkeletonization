@@ -30,7 +30,7 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # matplotlib support
-find_package(PythonLibs 2.7)
+find_package(PythonLibs)
 
 # specific version of eigen needed
 find_package(Eigen3 3.2.10 REQUIRED)
