@@ -68,7 +68,7 @@ struct options
         std::cout << std::endl;
     }
 
-    bool loadYAML(std::string config_file){
+    void loadYAML(std::string config_file){
         YAML::Node config = YAML::LoadFile(config_file);
         
         // IO

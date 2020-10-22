@@ -44,8 +44,8 @@ class CloudVisualization
 
         void add_cloud(const Eigen::MatrixXd & cloud) {
             polyscope::registerPointCloud(cloud_object_name_, cloud);
-            polyscope::getPointCloud(cloud_object_name_)->pointColor = glm::vec3{0.1, 0.1, 1};
-            polyscope::view::resetCameraToDefault();
+            polyscope::getPointCloud(cloud_object_name_)->setPointColor(glm::vec3{0.1, 0.1, 1});
+            polyscope::view::resetCameraToHomeView();
         }
 
         void add_color(const Eigen::MatrixXd & colors, std::string color_name) {

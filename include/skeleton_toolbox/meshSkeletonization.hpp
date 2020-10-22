@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "libGraphCpp/include/libGraphCpp/graph.hpp"
+#include "libGraphCpp/include/libGraphCpp/plotGraph.hpp"
 
 #include "farthest_sampling.hpp"
 
@@ -68,7 +69,7 @@ public:
 	{
 	}
 
-    bool skeletonize()
+    void skeletonize()
     {
         init();
         normalization();
@@ -84,7 +85,7 @@ public:
 		return true;
 	}
 
-	bool laplacian_contraction() 
+	void laplacian_contraction() 
     {
         if ( not initialized_ )
             init();
@@ -216,7 +217,7 @@ public:
         }
         
         if (opts_.visualization)
-            skeleton_->plot();
+            visualization::plot(*skeleton_, "skeletonization");
 
         if ( (updated_correspondences.array() == -1).any() )
             std::cout << "Warning: bad point correspondence\n'";

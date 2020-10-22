@@ -44,8 +44,8 @@ class MeshVisualization
 
         void add_mesh(const Eigen::MatrixXd& vertices, const Eigen::MatrixXi& faces) {
             polyscope::registerSurfaceMesh(mesh_object_name_, vertices, faces);
-            polyscope::getSurfaceMesh(mesh_object_name_)->surfaceColor = glm::vec3{0.1, 0.1, 1};
-            polyscope::view::resetCameraToDefault();
+            polyscope::getSurfaceMesh(mesh_object_name_)->setSurfaceColor(glm::vec3{0.1, 0.1, 1});
+            polyscope::view::resetCameraToHomeView();
         }
 
         void add_color(const Eigen::MatrixXd & color, std::string color_name) {

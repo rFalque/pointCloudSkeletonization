@@ -24,7 +24,7 @@ inline bool plot_mesh_and_cloud (const Eigen::MatrixXd& mesh_V, const Eigen::Mat
     CloudVisualization viz_cloud;
     viz_cloud.add_cloud(cloud_V);
     
-    polyscope::view::resetCameraToDefault();
+    polyscope::view::resetCameraToHomeView();
     polyscope::show();
     polyscope::removeAllStructures();
     return 0;

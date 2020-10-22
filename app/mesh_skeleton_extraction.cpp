@@ -42,7 +42,6 @@
 int main(int argc, char* argv[])
 {
     polyscope::init();
-    ::polyscope_is_initialized = true;
 
     options opts;
     opts.loadYAML("../config.yaml");
@@ -92,7 +91,7 @@ int main(int argc, char* argv[])
     // get skeleton
     libgraphcpp::Graph skeleton = skeletonizer.get_skeleton();
     skeleton.save("../data/output/skeleton_graph.obj");
-    skeleton.plot();
+    visualization::plot(skeleton, "pointcloud skeletonized");
 
     Eigen::VectorXd correspondences_copy = correspondences.cast <double> ();
     double modulo_factor = 2;
