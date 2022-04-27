@@ -49,6 +49,7 @@ To run the sample, then just type:
 
 ## todo
 * add parallelization
+* stop the contraction once the shrinking reach a certain stage, otherwise the skeleton diverges at some point
 
 ## Differences with the original paper [[1]](#link-to-the-original-papers)
 * Different implementation of the laplacian
@@ -62,3 +63,16 @@ To run the sample, then just type:
 ## Other implementations
 * Matlab implementation: [https://github.com/ataiya/cloudcontr](https://github.com/ataiya/cloudcontr)
 * C++ implementation for triangular meshes: [CGAL](https://doc.cgal.org/latest/Surface_mesh_skeletonization/index.html#Chapter_3D_Surface_mesh_skeletonization)
+
+## Used in paper
+```
+@ARTICLE{8968326,
+  author={Wu, Lan and Falque, Raphael and Perez-Puchalt, Victor and Liu, Liyang and Pietroni, Nico and Vidal-Calleja, Teresa},
+  journal={IEEE Robotics and Automation Letters}, 
+  title={Skeleton-Based Conditionally Independent Gaussian Process Implicit Surfaces for Fusion in Sparse to Dense 3D Reconstruction}, 
+  year={2020},
+  volume={5},
+  number={2},
+  pages={1532-1539},
+  doi={10.1109/LRA.2020.2969175}}
+```
